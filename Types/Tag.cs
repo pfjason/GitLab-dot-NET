@@ -11,8 +11,14 @@ namespace GitLab
 {
     public partial class GitLab
     {
-        class Tag
+        public partial class Project
         {
+            public class Tag
+            {
+                public Commit commit;
+                
+
+            }
         }
     }
 }

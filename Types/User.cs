@@ -49,7 +49,7 @@ namespace GitLab
                 //TODO: Implement function here 
                 throw new NotImplementedException();
 
-                return RetVal;
+               // return RetVal;
             }
 
             /// <summary>

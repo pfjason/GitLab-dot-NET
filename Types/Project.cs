@@ -14,7 +14,7 @@ namespace GitLab
         /// <remarks>
         /// See https://gitlab.com/help/api/projects.md for reference
         /// </remarks>
-        public class Project
+        public  partial class Project
         {
             public string name
                 , name_with_namespace
