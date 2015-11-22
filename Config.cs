@@ -10,11 +10,12 @@ namespace GitLab
 {
     public class Config
     {
-        private string _Name = null;
-        private string _GitLabURI = null;
-        private string _APIKey = null;
-        private string _DefaultProjectLocation = null;
+        private string _Name = "";
+        private string _GitLabURI = "";
+        private string _APIKey = "";
+        private string _DefaultProjectLocation = "";
         private bool _PreferHTTPPush = false;
+        private string RegKey;
         private Guid _Identity;
 
         public Guid Identity
@@ -102,7 +103,7 @@ namespace GitLab
                 _identity = Guid.NewGuid();
 
             _Identity = _identity;
-
+            RegKey = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name.ToString();
             Load();
         }
 
@@ -113,29 +114,29 @@ namespace GitLab
 
         public void Save()
         {
-            Registry.Write(RegistryHive.CurrentUser, "SOFTWARE\\GitLab\\" + _Identity.ToString(), "PreferHTTPPush", _PreferHTTPPush.ToString(), RegistryValueKind.String);
-            Registry.Write(RegistryHive.CurrentUser, "SOFTWARE\\GitLab\\" + _Identity.ToString(), "Name", _Name, RegistryValueKind.String);
-            Registry.Write(RegistryHive.CurrentUser, "SOFTWARE\\GitLab\\" + _Identity.ToString(), "GitLabURI", _GitLabURI, RegistryValueKind.String);
-            Registry.Write(RegistryHive.CurrentUser, "SOFTWARE\\GitLab\\" + _Identity.ToString(), "DefaultProjectLocation", _DefaultProjectLocation, RegistryValueKind.String);
-            Registry.Write(RegistryHive.CurrentUser, "SOFTWARE\\GitLab\\" + _Identity.ToString(), "APIKey", _APIKey, RegistryValueKind.String);
+            Registry.Write(RegistryHive.CurrentUser, "SOFTWARE\\"+RegKey+"\\" + _Identity.ToString(), "PreferHTTPPush", _PreferHTTPPush.ToString(), RegistryValueKind.String);
+            Registry.Write(RegistryHive.CurrentUser, "SOFTWARE\\"+RegKey+"\\" + _Identity.ToString(), "Name", _Name, RegistryValueKind.String);
+            Registry.Write(RegistryHive.CurrentUser, "SOFTWARE\\"+RegKey+"\\" + _Identity.ToString(), "GitLabURI", _GitLabURI, RegistryValueKind.String);
+            Registry.Write(RegistryHive.CurrentUser, "SOFTWARE\\"+RegKey+"\\" + _Identity.ToString(), "DefaultProjectLocation", _DefaultProjectLocation, RegistryValueKind.String);
+            Registry.Write(RegistryHive.CurrentUser, "SOFTWARE\\"+RegKey+"\\" + _Identity.ToString(), "APIKey", _APIKey, RegistryValueKind.String);
         }
 
         public void Load()
         {
-            if (Registry.Check(RegistryHive.CurrentUser, "SOFTWARE\\GitLab\\" + _Identity.ToString(), "GitLabURI"))
-                _GitLabURI = Registry.Read(RegistryHive.CurrentUser, "SOFTWARE\\GitLab\\" + _Identity.ToString(), "GitLabURI").ToString();
+            if (Registry.Check(RegistryHive.CurrentUser, "SOFTWARE\\"+RegKey+"\\" + _Identity.ToString(), "GitLabURI"))
+                _GitLabURI = Registry.Read(RegistryHive.CurrentUser, "SOFTWARE\\"+RegKey+"\\" + _Identity.ToString(), "GitLabURI").ToString();
 
-            if (Registry.Check(RegistryHive.CurrentUser, "SOFTWARE\\GitLab\\" + _Identity.ToString(), "APIKey"))
-                _APIKey = Registry.Read(RegistryHive.CurrentUser, "SOFTWARE\\GitLab\\" + _Identity.ToString(), "APIKey").ToString();
+            if (Registry.Check(RegistryHive.CurrentUser, "SOFTWARE\\"+RegKey+"\\" + _Identity.ToString(), "APIKey"))
+                _APIKey = Registry.Read(RegistryHive.CurrentUser, "SOFTWARE\\"+RegKey+"\\" + _Identity.ToString(), "APIKey").ToString();
 
-            if (Registry.Check(RegistryHive.CurrentUser, "SOFTWARE\\GitLab\\" + _Identity.ToString(), "DefaultProjectLocation"))
-                _DefaultProjectLocation = Registry.Read(RegistryHive.CurrentUser, "SOFTWARE\\GitLab\\" + _Identity.ToString(), "DefaultProjectLocation").ToString();
+            if (Registry.Check(RegistryHive.CurrentUser, "SOFTWARE\\"+RegKey+"\\" + _Identity.ToString(), "DefaultProjectLocation"))
+                _DefaultProjectLocation = Registry.Read(RegistryHive.CurrentUser, "SOFTWARE\\"+RegKey+"\\" + _Identity.ToString(), "DefaultProjectLocation").ToString();
 
-            if (Registry.Check(RegistryHive.CurrentUser, "SOFTWARE\\GitLab\\" + _Identity.ToString(), "PreferHTTPPush"))
-                _PreferHTTPPush = Convert.ToBoolean(Registry.Read(RegistryHive.CurrentUser, "SOFTWARE\\GitLab\\" + _Identity.ToString(), "PreferHTTPPush").ToString());
+            if (Registry.Check(RegistryHive.CurrentUser, "SOFTWARE\\"+RegKey+"\\" + _Identity.ToString(), "PreferHTTPPush"))
+                _PreferHTTPPush = Convert.ToBoolean(Registry.Read(RegistryHive.CurrentUser, "SOFTWARE\\"+RegKey+"\\" + _Identity.ToString(), "PreferHTTPPush").ToString());
 
-            if (Registry.Check(RegistryHive.CurrentUser, "SOFTWARE\\GitLab\\" + _Identity.ToString(), "Name"))
-                Name = Registry.Read(RegistryHive.CurrentUser, "SOFTWARE\\GitLab\\" + _Identity.ToString(), "Name").ToString();
+            if (Registry.Check(RegistryHive.CurrentUser, "SOFTWARE\\"+RegKey+"\\" + _Identity.ToString(), "Name"))
+                Name = Registry.Read(RegistryHive.CurrentUser, "SOFTWARE\\"+RegKey+"\\" + _Identity.ToString(), "Name").ToString();
         }
 
         public static Collection<Config> GetAllConfigs()
