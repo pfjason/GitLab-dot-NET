@@ -13,6 +13,8 @@ namespace GitLab
     {
         class Key
         {
+            public int id;
+            public string title, key, created_at;            
         }
     }
 }
