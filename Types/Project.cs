@@ -17,18 +17,40 @@ namespace GitLab
             {
                 if (_Projects == null)
                 {
-                    
+                    RefreshProjects();
                 }
                 return _Projects;
             }
         }
+
+        public void RefreshProjects()
+        {
+            _Projects = Project.List(this.CurrentConfig);
+        }
+
+        public Project CreateProject(string _Name, string _Description, Namespace _Namespace, Project.VisibilityLevel _VisibilityLevel)
+        {
+            Project RetVal = Project.Create(CurrentConfig, _Name, _Description, _Namespace, _VisibilityLevel);
+            this.RefreshProjects();
+            return RetVal;
+        }
+
+        /// <summary>
+        /// Non-Static Delete Project function
+        /// </summary>
+        /// <param name="_Project"></param>
+        public void DeleteProject(Project _Project)
+        {
+            GitLab.Project.Delete(CurrentConfig, _Project);
+        }
+
         /// <summary>
         /// GitLab Project Class
         /// </summary>
         /// <remarks>
         /// See https://gitlab.com/help/api/projects.md for reference
         /// </remarks>
-        public  partial class Project
+        public  partial class Project : object
         {
             public string name
                 , name_with_namespace
@@ -48,6 +70,7 @@ namespace GitLab
             public bool issues_enabled, merge_requests_enabled, wiki_enabled, snippets_enabled , builds_enabled, archived;
             public Owner owner;
             public Namespace NameSpace;
+
             /// <summary>
             /// Creates a new project
             /// </summary>
@@ -59,15 +82,85 @@ namespace GitLab
             /// <returns></returns>
             public static Project Create(Config _Config, string _Name, string _Description, Namespace _Namespace, VisibilityLevel _VisibilityLevel)
             {
-                Project RetVal = JsonConvert.DeserializeObject<Project>(Unirest.post(_Config.APIUrl + "projects?name=" + HttpUtility.UrlEncode(_Name)
+                HttpResponse<string> R = Unirest.post(_Config.APIUrl + "projects?name=" + HttpUtility.UrlEncode(_Name)
                                         + "&namespace_id=" + _Namespace.id.ToString()
                                         + "&description=" + HttpUtility.UrlEncode(_Description)
                                         + "&visibility_level=" + Convert.ToInt64(_VisibilityLevel).ToString())
                                         .header("accept", "application/json")
                                         .header("PRIVATE-TOKEN", _Config.APIKey)
-                                        .asString().Body);
+                                        .asString();
 
+                if (R.Code < 200 | R.Code >=300)
+                {
+                    try
+                    {
+                        Error E = JsonConvert.DeserializeObject<Error>(R.Body);
+                        throw new GitLabServerErrorException(E.message, R.Code);
+                    }
+                    catch (GitLabServerErrorException ex)
+                    {
+                        throw (ex);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception(R.Code + ": " + R.Body, ex);
+                    }
+                }            
+
+                Project RetVal = JsonConvert.DeserializeObject<Project>(R.Body);
                 return RetVal;
+            }
+
+            /// <summary>
+            /// Update any project
+            /// </summary>
+            /// <param name="_Config">Gitlab Config Object</param>
+            /// <param name="_Project">Project object</param>
+            /// <returns></returns>
+            public static Project Update(Config _Config, Project _Project)
+            {
+                HttpResponse<string> R = Unirest.put(_Config.APIUrl + "projects/"+_Project.id.ToString()
+                                        +"?name=" + HttpUtility.UrlEncode(_Project.name)
+                                        + "&path=" + HttpUtility.UrlEncode(_Project.path)
+                                        + "&description=" + HttpUtility.UrlEncode(_Project.description)
+                                        + "&default_branch=" + HttpUtility.UrlEncode(_Project.default_branch)
+                                        + "&issues_enabled=" + Convert.ToInt32(_Project.issues_enabled).ToString()
+                                        + "&merge_requests_enabled=" + Convert.ToInt32(_Project.merge_requests_enabled).ToString()
+                                        + "&builds_enabled=" + Convert.ToInt32(_Project.builds_enabled).ToString()
+                                        + "&wiki_enabled=" + Convert.ToInt32(_Project.wiki_enabled).ToString()
+                                        + "&snippets_enabled=" + Convert.ToInt32(_Project.snippets_enabled).ToString()
+                                        + "&visibility_level=" + Convert.ToInt64(_Project.visibility_level).ToString())
+                                        .header("accept", "application/json")
+                                        .header("PRIVATE-TOKEN", _Config.APIKey)
+                                        .asString();
+
+                if (R.Code < 200 | R.Code >= 300)
+                {
+                    Error E = JsonConvert.DeserializeObject<Error>(R.Body);
+                    throw new GitLabServerErrorException(E.message, R.Code);
+                }
+
+                Project RetVal = JsonConvert.DeserializeObject<Project>(R.Body);
+                return RetVal;
+            }
+
+            /// <summary>
+            /// Deletes a project
+            /// </summary>
+            /// <param name="_Config"></param>
+            /// <param name="_Project"></param>
+            public static void Delete(Config _Config, Project _Project)
+            {
+                HttpResponse<string> R = Unirest.delete(_Config.APIUrl + "projects/" + _Project.id.ToString())                                        
+                                        .header("accept", "application/json")
+                                        .header("PRIVATE-TOKEN", _Config.APIKey)
+                                        .asString();
+
+                if (R.Code < 200 | R.Code >= 300)
+                {
+                    Error E = JsonConvert.DeserializeObject<Error>(R.Body);
+                    throw new GitLabServerErrorException(E.message, R.Code);
+                }                
             }
 
             /// <summary>
@@ -81,9 +174,7 @@ namespace GitLab
 
                 try
                 {
-                    int page = 1;
-
-                    User Me = JsonConvert.DeserializeObject<User>(Unirest.get(_Config.APIUrl + "user?private_token=" + _Config.APIKey).header("accept", "application/json").asString().Body);
+                    int page = 1;                    
                     List<Project> projects = new List<Project>();
                     
                     do
@@ -95,10 +186,10 @@ namespace GitLab
                                 .header("accept", "application/json")
                                 .asString();
 
-                        if (R.Code != 200)
+                        if (R.Code < 200 | R.Code >= 300)
                         {
                             Error E = JsonConvert.DeserializeObject<Error>(R.Body);
-                            throw new GitLabServerErrorException(E.message);
+                            throw new GitLabServerErrorException(E.message, R.Code);
                         }
                         else
                         {
@@ -108,13 +199,15 @@ namespace GitLab
                                 JArray ResultArray = (JArray)Result;
                                 foreach (JToken Token in ResultArray)
                                 {
-                                    //Console.WriteLine(Token.ToString());
+                                 //   Console.WriteLine(Token.ToString());
                                     Project P = JsonConvert.DeserializeObject<Project>(Token.ToString());
                                     projects.Add(P);
                                 }
                             }
                         }
                         page++;
+                        RetVal.AddRange(projects);
+                        projects = new List<Project>();
                     }
                     while (projects.Count > 0 & page < 100);
                 }
@@ -124,6 +217,62 @@ namespace GitLab
                 }
                 return RetVal;            
         }
+
+            /// <summary>
+            /// Query projects by name
+            /// </summary>
+            /// <param name="_Config"></param>
+            /// <returns></returns>
+            public static List<Project> Search(Config _Config, string Query)
+            {
+                List<Project> RetVal = new List<Project>();
+
+                try
+                {
+                    int page = 1;
+                    List<Project> projects = new List<Project>();
+
+                    do
+                    {
+                        HttpResponse<string> R = Unirest.get
+                                (_Config.APIUrl + "projects/search/"+HttpUtility.UrlEncode(Query)
+                                +"?per_page=100"
+                                + "&page=" + page.ToString()
+                                + "&private_token=" + _Config.APIKey)
+                                .header("accept", "application/json")
+                                .asString();
+
+                        if (R.Code < 200 | R.Code >= 300)
+                        {
+                            Error E = JsonConvert.DeserializeObject<Error>(R.Body);
+                            throw new GitLabServerErrorException(E.message, R.Code);
+                        }
+                        else
+                        {
+                            dynamic Result = JsonConvert.DeserializeObject(R.Body);
+                            if (Result is JArray)
+                            {
+                                JArray ResultArray = (JArray)Result;
+                                foreach (JToken Token in ResultArray)
+                                {
+                                    //   Console.WriteLine(Token.ToString());
+                                    Project P = JsonConvert.DeserializeObject<Project>(Token.ToString());
+                                    projects.Add(P);
+                                }
+                            }
+                        }
+                        page++;
+                        RetVal.AddRange(projects);
+                        projects = new List<Project>();
+                    }
+                    while (projects.Count > 0 & page < 100);
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+                return RetVal;
+            }
 
             /// <summary>
             /// Project Visibility Level as enum for ease of use;
@@ -142,6 +291,11 @@ namespace GitLab
             {
                 public int id;
                 public string name, created_at;
+            }
+
+            new public string ToString()
+            {
+                return this.name_with_namespace;
             }
         }
     }

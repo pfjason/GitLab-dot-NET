@@ -21,7 +21,16 @@ namespace GitLab
 
         public GitLab(Config _config)
         {
-            CurrentConfig = _config;         
-        }       
+            CurrentConfig = _config;
+            Refresh();   
+        }
+
+        /// <summary>
+        /// Refreshes Everything for this GitLab object;
+        /// </summary>
+        public void Refresh()
+        {
+            RefreshProjects();
+        }
     }
 }

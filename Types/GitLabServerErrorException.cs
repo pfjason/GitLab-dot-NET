@@ -7,9 +7,27 @@ namespace GitLab
 {
     public class GitLabServerErrorException : System.Exception
     {
-        public GitLabServerErrorException(string Message): base(Message)
+        public int ErrorCode
         {
-            
+            get
+            {
+                return _ErrorCode;
+            }
+        }
+
+        private int _ErrorCode;
+
+        new public string Message
+        {
+            get { return _Message; }
+        }
+
+        private string _Message;
+
+        public GitLabServerErrorException(string _message, int _errorcode): base(_message)
+        {            
+            this._Message = _message;
+            this._ErrorCode = _errorcode;
         }
     }
 }

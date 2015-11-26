@@ -37,13 +37,21 @@ namespace GitLab
                     List<Namespace> namespaces = new List<Namespace>();
                     
                     do
-                    {                        
-                        namespaces = JsonConvert.DeserializeObject<List<Namespace>>(Unirest.get
-                                (_Config.APIUrl + "Namespaces?per_page=100"
+                    {
+                        HttpResponse<string> R = Unirest.get
+                                (_Config.APIUrl + "/namespaces?per_page=100"
                                 + "&page=" + page.ToString()
                                 + "&private_token=" + _Config.APIKey)
                                 .header("accept", "application/json")
-                                .asString().Body);
+                                .asString();
+
+                        if (R.Code < 200 | R.Code >= 300)
+                        {
+                            Error E = JsonConvert.DeserializeObject<Error>(R.Body);
+                            throw new GitLabServerErrorException(E.message, R.Code);
+                        }
+
+                        namespaces = JsonConvert.DeserializeObject<List<Namespace>>(R.Body);
 
                        
                             foreach (Namespace NS in namespaces)
@@ -59,6 +67,8 @@ namespace GitLab
                             }
 
                         page++;
+                        RetVal.AddRange(namespaces);
+                        namespaces = new List<Namespace>();
                     }
                     while (namespaces.Count > 0 & page < 100);
                 }
