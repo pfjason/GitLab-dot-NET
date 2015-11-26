@@ -110,7 +110,7 @@ namespace GitLab
 
         void LoadNamespaces()
         {
-            Collection<GitLab.Namespace> NameSpaces = GitLab.Namespace.List(thisConfig);
+            List<GitLab.Namespace> NameSpaces = GitLab.Namespace.List(thisConfig);
             nameSpaceComboBox.Items.Clear();
 
             foreach (GitLab.Namespace NS in NameSpaces)

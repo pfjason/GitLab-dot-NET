@@ -142,8 +142,8 @@ namespace GitLab
         public static Collection<Config> GetAllConfigs()
         {
             Collection<Config> retVal = new Collection<Config>();
-
-            string[] keys = Registry.GetAllSubkeys(RegistryHive.CurrentUser, "SOFTWARE\\GitLab");
+            string RegKey = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name.ToString();
+            string[] keys = Registry.GetAllSubkeys(RegistryHive.CurrentUser, "SOFTWARE\\" + RegKey );
 
             if (keys != null)
                 foreach (string key in keys)

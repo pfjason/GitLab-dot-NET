@@ -24,10 +24,10 @@ namespace GitLab
                 return path;
             }
 
-            public static Collection<Namespace> List(Config _Config, bool _OnlyOwned = true)
+            public static List<Namespace> List(Config _Config, bool _OnlyOwned = true)
             {
 
-                Collection<Namespace> RetVal = new Collection<Namespace>();
+                List<Namespace> RetVal = new List<Namespace>();
 
                 try
                 {

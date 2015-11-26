@@ -3,11 +3,25 @@ using Newtonsoft.Json;
 using unirest_net.http;
 using System.Web;
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace GitLab
 {
     public partial class GitLab
     {
+        private List<Project> _Projects;
+
+        public List<Project> Projects
+        {
+            get
+            {
+                if (_Projects == null)
+                {
+                    
+                }
+                return _Projects;
+            }
+        }
         /// <summary>
         /// GitLab Project Class
         /// </summary>
@@ -30,10 +44,10 @@ namespace GitLab
                 , last_activity_at
                 , avatar_url;
             public string[] tag_list;
-            public int id, namespace_id, visibility_level, creator_id;
+            public int id, namespace_id, visibility_level, creator_id, star_count, forks_count;
             public bool issues_enabled, merge_requests_enabled, wiki_enabled, snippets_enabled , builds_enabled, archived;
             public Owner owner;
-   
+            public Namespace NameSpace;
             /// <summary>
             /// Creates a new project
             /// </summary>
@@ -62,9 +76,54 @@ namespace GitLab
             /// <param name="_Config"></param>
             /// <returns></returns>
             public static List<Project> List(Config _Config)
-            {                               
-                throw new NotImplementedException();
-            }
+            {
+                List<Project> RetVal = new List<Project>();
+
+                try
+                {
+                    int page = 1;
+
+                    User Me = JsonConvert.DeserializeObject<User>(Unirest.get(_Config.APIUrl + "user?private_token=" + _Config.APIKey).header("accept", "application/json").asString().Body);
+                    List<Project> projects = new List<Project>();
+                    
+                    do
+                    {
+                        HttpResponse<string> R =  Unirest.get
+                                (_Config.APIUrl + "projects?per_page=100"
+                                + "&page=" + page.ToString()
+                                + "&private_token=" + _Config.APIKey)
+                                .header("accept", "application/json")
+                                .asString();
+
+                        if (R.Code != 200)
+                        {
+                            Error E = JsonConvert.DeserializeObject<Error>(R.Body);
+                            throw new GitLabServerErrorException(E.message);
+                        }
+                        else
+                        {
+                            dynamic Result = JsonConvert.DeserializeObject(R.Body);
+                            if (Result is JArray)
+                            {
+                                JArray ResultArray = (JArray)Result;
+                                foreach (JToken Token in ResultArray)
+                                {
+                                    //Console.WriteLine(Token.ToString());
+                                    Project P = JsonConvert.DeserializeObject<Project>(Token.ToString());
+                                    Console.WriteLine(Token.SelectToken("namespace").ToString());
+                                }
+                            }
+                        }
+                        page++;
+                    }
+                    while (projects.Count > 0 & page < 100);
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+                return RetVal;            
+        }
 
             /// <summary>
             /// Project Visibility Level as enum for ease of use;
