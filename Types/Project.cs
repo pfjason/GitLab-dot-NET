@@ -110,7 +110,7 @@ namespace GitLab
                                 {
                                     //Console.WriteLine(Token.ToString());
                                     Project P = JsonConvert.DeserializeObject<Project>(Token.ToString());
-                                    Console.WriteLine(Token.SelectToken("namespace").ToString());
+                                    projects.Add(P);
                                 }
                             }
                         }
