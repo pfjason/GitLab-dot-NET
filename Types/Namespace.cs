@@ -33,38 +33,41 @@ namespace GitLab
                 {
                     int page = 1;
 
-                    User Me = JsonConvert.DeserializeObject<User>(Unirest.get(_Config.APIUrl + "user?private_token=" + _Config.APIKey).header("accept", "application/json").asString().Body);
+                    User Me = JsonConvert.DeserializeObject<User>(Unirest.get(_Config.APIUrl + "user")
+                        .header("accept", "application/json")
+                        .header("PRIVATE-TOKEN", _Config.APIKey)
+                        .asString().Body);
+
                     List<Namespace> namespaces = new List<Namespace>();
-                    
+
                     do
                     {
                         HttpResponse<string> R = Unirest.get
                                 (_Config.APIUrl + "/namespaces?per_page=100"
-                                + "&page=" + page.ToString()
-                                + "&private_token=" + _Config.APIKey)
+                                + "&page=" + page.ToString())
                                 .header("accept", "application/json")
+                                .header("PRIVATE-TOKEN", _Config.APIKey)
                                 .asString();
 
                         if (R.Code < 200 | R.Code >= 300)
                         {
-                            Error E = JsonConvert.DeserializeObject<Error>(R.Body);
-                            throw new GitLabServerErrorException(E.message, R.Code);
+                            throw new GitLabServerErrorException(R.Body, R.Code);
                         }
 
                         namespaces = JsonConvert.DeserializeObject<List<Namespace>>(R.Body);
 
-                       
-                            foreach (Namespace NS in namespaces)
+
+                        foreach (Namespace NS in namespaces)
+                        {
+                            if ((Me.username.ToUpperInvariant() == NS.path.ToUpperInvariant()
+                                    && NS.kind.ToUpperInvariant() == "USER")
+                                    | NS.kind.ToUpperInvariant() == "GROUP"
+                                    | !_OnlyOwned
+                                    )
                             {
-                                if ((Me.username.ToUpperInvariant() == NS.path.ToUpperInvariant()
-                                        && NS.kind.ToUpperInvariant() == "USER")
-                                        | NS.kind.ToUpperInvariant() == "GROUP"
-                                        | !_OnlyOwned
-                                        )
-                                {
-                                    RetVal.Add(NS);
-                                }
+                                RetVal.Add(NS);
                             }
+                        }
 
                         page++;
                         RetVal.AddRange(namespaces);

@@ -42,6 +42,7 @@ namespace GitLab
         public void DeleteProject(Project _Project)
         {
             GitLab.Project.Delete(CurrentConfig, _Project);
+            this.RefreshProjects();
         }
 
         /// <summary>
@@ -90,22 +91,10 @@ namespace GitLab
                                         .header("PRIVATE-TOKEN", _Config.APIKey)
                                         .asString();
 
-                if (R.Code < 200 | R.Code >=300)
+                if (R.Code < 200 | R.Code >= 300)
                 {
-                    try
-                    {
-                        Error E = JsonConvert.DeserializeObject<Error>(R.Body);
-                        throw new GitLabServerErrorException(E.message, R.Code);
-                    }
-                    catch (GitLabServerErrorException ex)
-                    {
-                        throw (ex);
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new Exception(R.Code + ": " + R.Body, ex);
-                    }
-                }            
+                    throw new GitLabServerErrorException(R.Body, R.Code);
+                }
 
                 Project RetVal = JsonConvert.DeserializeObject<Project>(R.Body);
                 return RetVal;
@@ -136,8 +125,7 @@ namespace GitLab
 
                 if (R.Code < 200 | R.Code >= 300)
                 {
-                    Error E = JsonConvert.DeserializeObject<Error>(R.Body);
-                    throw new GitLabServerErrorException(E.message, R.Code);
+                    throw new GitLabServerErrorException(R.Body, R.Code);
                 }
 
                 Project RetVal = JsonConvert.DeserializeObject<Project>(R.Body);
@@ -158,9 +146,8 @@ namespace GitLab
 
                 if (R.Code < 200 | R.Code >= 300)
                 {
-                    Error E = JsonConvert.DeserializeObject<Error>(R.Body);
-                    throw new GitLabServerErrorException(E.message, R.Code);
-                }                
+                    throw new GitLabServerErrorException(R.Body, R.Code);
+                }
             }
 
             /// <summary>
@@ -181,15 +168,14 @@ namespace GitLab
                     {
                         HttpResponse<string> R =  Unirest.get
                                 (_Config.APIUrl + "projects?per_page=100"
-                                + "&page=" + page.ToString()
-                                + "&private_token=" + _Config.APIKey)
+                                + "&page=" + page.ToString())
                                 .header("accept", "application/json")
+                                .header("PRIVATE-TOKEN", _Config.APIKey)
                                 .asString();
 
                         if (R.Code < 200 | R.Code >= 300)
                         {
-                            Error E = JsonConvert.DeserializeObject<Error>(R.Body);
-                            throw new GitLabServerErrorException(E.message, R.Code);
+                            throw new GitLabServerErrorException(R.Body, R.Code);
                         }
                         else
                         {
@@ -237,15 +223,14 @@ namespace GitLab
                         HttpResponse<string> R = Unirest.get
                                 (_Config.APIUrl + "projects/search/"+HttpUtility.UrlEncode(Query)
                                 +"?per_page=100"
-                                + "&page=" + page.ToString()
-                                + "&private_token=" + _Config.APIKey)
+                                + "&page=" + page.ToString())
                                 .header("accept", "application/json")
+                                .header("PRIVATE-TOKEN", _Config.APIKey)
                                 .asString();
 
                         if (R.Code < 200 | R.Code >= 300)
                         {
-                            Error E = JsonConvert.DeserializeObject<Error>(R.Body);
-                            throw new GitLabServerErrorException(E.message, R.Code);
+                            throw new GitLabServerErrorException(R.Body, R.Code);
                         }
                         else
                         {
@@ -255,7 +240,6 @@ namespace GitLab
                                 JArray ResultArray = (JArray)Result;
                                 foreach (JToken Token in ResultArray)
                                 {
-                                    //   Console.WriteLine(Token.ToString());
                                     Project P = JsonConvert.DeserializeObject<Project>(Token.ToString());
                                     projects.Add(P);
                                 }

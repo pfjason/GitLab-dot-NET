@@ -99,7 +99,6 @@
     <Compile Include="Types\Branch.cs" />
     <Compile Include="Types\Commit.cs" />
     <Compile Include="Types\DeployKey.cs" />
-    <Compile Include="Types\Error.cs" />
     <Compile Include="Types\File.cs" />
     <Compile Include="Types\GitLabServerErrorException.cs" />
     <Compile Include="Types\Group.cs" />
