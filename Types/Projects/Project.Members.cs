@@ -10,8 +10,18 @@ namespace GitLab
         partial class Project
         {
 
-            public class ProjectMemberList: List<Member>
+            public class ProjectMemberList: List<Member> , IMemberContainer
             {
+                public void SetMemberAccessLevel(Member _Member, Member.AccessLevel _AccessLevel)
+                {
+                    if (this.Parent != null)
+                    {
+                        Project.UpdateMember(this.Parent.Parent.CurrentConfig, this.Parent, _Member, _AccessLevel);
+                        RefreshMembers();
+                    }
+                    else throw new GitLabStaticAccessException("Unable to set Access Level without Parent GitLab object");
+                }
+
                 private Project _Parent = null;
 
                 public Project Parent
@@ -36,6 +46,7 @@ namespace GitLab
 
                         foreach ( Member M in ListMembers(Parent.Parent.CurrentConfig, Parent))
                         {
+                            M.SetParent(this);
                             base.Add(M);
                         }
                     }
