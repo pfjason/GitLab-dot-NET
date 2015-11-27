@@ -24,14 +24,14 @@ namespace GitLab
                 return path;
             }
 
-            public static List<Namespace> List(Config _Config, bool _OnlyOwned = true)
+            public static List<Namespace> List(Config _Config, bool _OnlyOwned = true, string _Search = null)
             {
 
                 List<Namespace> RetVal = new List<Namespace>();
 
                 try
                 {
-                    int page = 1;
+                    int page = 1;                    
 
                     User Me = JsonConvert.DeserializeObject<User>(Unirest.get(_Config.APIUrl + "user")
                         .header("accept", "application/json")
@@ -42,9 +42,14 @@ namespace GitLab
 
                     do
                     {
-                        HttpResponse<string> R = Unirest.get
-                                (_Config.APIUrl + "/namespaces?per_page=100"
-                                + "&page=" + page.ToString())
+
+                        string URI = _Config.APIUrl + "/namespaces?per_page=100"
+                                + "&page=" + page.ToString();
+
+                        if (_Search != null)
+                            URI += "%&search=" + HttpUtility.UrlEncode(_Search);
+
+                        HttpResponse <string> R = Unirest.get(URI)
                                 .header("accept", "application/json")
                                 .header("PRIVATE-TOKEN", _Config.APIKey)
                                 .asString();
