@@ -30,4 +30,19 @@ namespace GitLab
             this._ErrorCode = _errorcode;
         }
     }
+
+    public class GitLabStaticAccessException : System.Exception
+    {
+        new public string Message
+        {
+            get { return _Message; }
+        }
+
+        private string _Message;
+
+        public GitLabStaticAccessException(string _message): base(_message)
+        {
+            this._Message = _message;
+        }
+    }
 }

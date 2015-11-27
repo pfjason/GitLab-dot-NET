@@ -96,20 +96,24 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config.cs" />
-    <Compile Include="Types\Branch.cs" />
+    <Compile Include="Types\Projects\Project.Branch.cs" />
     <Compile Include="Types\Commit.cs" />
     <Compile Include="Types\DeployKey.cs" />
     <Compile Include="Types\File.cs" />
-    <Compile Include="Types\GitLabServerErrorException.cs" />
-    <Compile Include="Types\Group.cs" />
+    <Compile Include="Types\Exceptions.cs" />
+    <Compile Include="Types\Groups\Group.cs" />
+    <Compile Include="Types\Groups\Group.Members.cs" />
+    <Compile Include="Types\Groups\Group.StaticMethods.cs" />
     <Compile Include="Types\Issue.cs" />
     <Compile Include="Types\Key.cs" />
     <Compile Include="Types\Label.cs" />
+    <Compile Include="Types\Member.cs" />
     <Compile Include="Types\MergeRequest.cs" />
     <Compile Include="Types\Milestone.cs" />
     <Compile Include="Types\Namespace.cs" />
     <Compile Include="Types\Note.cs" />
-    <Compile Include="Types\Project.cs" />
+    <Compile Include="Types\Projects\Project.cs" />
+    <Compile Include="Types\Projects\Project.Members.cs" />
     <Compile Include="Types\Repository.cs" />
     <Compile Include="Types\Service.cs" />
     <Compile Include="Types\Session.cs" />
@@ -137,6 +141,7 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+    <Compile Include="Types\Projects\Project.StaticMethods.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Windows Forms\ConfigurationForm.resx">

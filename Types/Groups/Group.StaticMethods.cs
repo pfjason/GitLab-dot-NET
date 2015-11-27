@@ -10,17 +10,10 @@ using Newtonsoft.Json.Linq;
 
 namespace GitLab
 {
-    public partial class GitLab
+    partial class GitLab
     {
-
-        public class Group
+        public partial class Group
         {
-            public int id;
-            public string name,
-                          path,
-                          description;
-
-
             /// <summary>
             /// Creates a new project group. Available only for users who can create groups.
             /// </summary>
@@ -114,6 +107,43 @@ namespace GitLab
             }
 
             /// <summary>
+            /// Get a single group description by numeric group ID
+            /// </summary>
+            /// <param name="_Config"></param>
+            /// <param name="_id"></param>
+            /// <returns></returns>
+            public static Group Get(Config _Config, int _id)
+            {
+                Group RetVal = null;
+
+                try
+                {
+                    string URI = _Config.APIUrl + "groups/" + _id.ToString();
+
+                    HttpResponse<string> R = Unirest.get(URI)
+                                .header("accept", "application/json")
+                                .header("PRIVATE-TOKEN", _Config.APIKey)
+                                .asString();
+
+                    if (R.Code < 200 | R.Code >= 300)
+                    {
+                        throw new GitLabServerErrorException(R.Body, R.Code);
+                    }
+                    else
+                    {
+                        RetVal = JsonConvert.DeserializeObject<Group>(R.Body.ToString());
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+                return RetVal;
+            }
+
+
+            /// <summary>
             /// Removes group with all projects inside.
             /// </summary>
             /// <param name="_Config"></param>
@@ -129,27 +159,6 @@ namespace GitLab
                 {
                     throw new GitLabServerErrorException(R.Body, R.Code);
                 }
-            }
-
-            public enum AccessLevel
-            {
-                GUEST = 10
-                    , REPORTER = 20
-                    , DEVELOPER = 30
-                    , MASTER = 40
-                    , OWNER = 50
-            }
-
-            public class Member
-            {
-                public int id;
-                public string username
-                    , email
-                    , name
-                    , state
-                    , created_at;
-
-                public AccessLevel access_level;
             }
 
             /// <summary>
@@ -172,7 +181,7 @@ namespace GitLab
                         string URI = (_Config.APIUrl + "groups/"
                                 + "?per_page=100"
                                 + "&page=" + page.ToString());
-                        
+
 
                         HttpResponse<string> R = Unirest.get(URI)
                                 .header("accept", "application/json")
@@ -216,9 +225,9 @@ namespace GitLab
             /// <param name="_Group"></param>
             /// <param name="_User"></param>
             /// <param name="_AccessLevel"></param>
-            public static void AddMember(Config _Config, Group _Group, User _User, AccessLevel _AccessLevel)
+            public static void AddMember(Config _Config, Group _Group, User _User, Member.AccessLevel _AccessLevel)
             {
-                string URI = _Config.APIUrl + "groups/" + _Group.id.ToString() + "/members/" + _User.id + "?access_level=" + Convert.ToInt64(_AccessLevel);
+                string URI = _Config.APIUrl + "groups/" + _Group.id.ToString() + "/members/?user_id=" + _User.id + "?access_level=" + Convert.ToInt64(_AccessLevel);
 
                 HttpResponse<string> R = Unirest.post(URI)
                                         .header("accept", "application/json")
@@ -238,9 +247,9 @@ namespace GitLab
             /// <param name="_Group"></param>
             /// <param name="_User"></param>
             /// <param name="_AccessLevel"></param>
-            public static void UpdateMember(Config _Config, Group _Group, User _User, AccessLevel _AccessLevel)
+            public static void UpdateMember(Config _Config, Group _Group, User _User, Member.AccessLevel _AccessLevel)
             {
-                string URI = _Config.APIUrl + "groups/" + _Group.id.ToString() + "/members/" + _User.id + "?access_level=" + Convert.ToInt64(_AccessLevel);
+                string URI = _Config.APIUrl + "groups/" + _Group.id.ToString() + "/members/" + _User.id + "&access_level=" + Convert.ToInt64(_AccessLevel);
 
                 HttpResponse<string> R = Unirest.put(URI)
                                         .header("accept", "application/json")
@@ -281,7 +290,7 @@ namespace GitLab
             /// <param name="_Project"></param>
             public static void TransferProject(Config _Config, Group _Group, Project _Project)
             {
-                string URI = _Config.APIUrl + "groups/" + _Group.id.ToString() + "/projects/" + _Project.id ;
+                string URI = _Config.APIUrl + "groups/" + _Group.id.ToString() + "/projects/" + _Project.id;
 
                 HttpResponse<string> R = Unirest.post(URI)
                                         .header("accept", "application/json")

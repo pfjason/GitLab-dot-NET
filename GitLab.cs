@@ -13,11 +13,12 @@ using Microsoft.Win32;
 namespace GitLab
 {
     /// <summary>
+    /// Class for interfacing with a GitLab API via .NET
     /// See https://gitlab.com/help/api/README.md for API Reference
     /// </summary>
     public partial class GitLab
     {
-        public Config CurrentConfig = null;      
+        public Config CurrentConfig = null;
 
         public GitLab(Config _config)
         {
@@ -31,6 +32,7 @@ namespace GitLab
         public void Refresh()
         {
             RefreshProjects();
-        }
+            RefreshGroups();
+        }        
     }
 }

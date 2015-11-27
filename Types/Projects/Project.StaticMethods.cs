@@ -7,71 +7,10 @@ using Newtonsoft.Json.Linq;
 
 namespace GitLab
 {
-    public partial class GitLab
+    partial class GitLab
     {
-        private List<Project> _Projects;
-
-        public List<Project> Projects
+        partial class Project
         {
-            get
-            {
-                if (_Projects == null)
-                {
-                    RefreshProjects();
-                }
-                return _Projects;
-            }
-        }
-
-        public void RefreshProjects()
-        {
-            _Projects = Project.List(this.CurrentConfig);
-        }
-
-        public Project CreateProject(string _Name, string _Description, Namespace _Namespace, Project.VisibilityLevel _VisibilityLevel)
-        {
-            Project RetVal = Project.Create(CurrentConfig, _Name, _Description, _Namespace, _VisibilityLevel);
-            this.RefreshProjects();
-            return RetVal;
-        }
-
-        /// <summary>
-        /// Non-Static Delete Project function
-        /// </summary>
-        /// <param name="_Project"></param>
-        public void DeleteProject(Project _Project)
-        {
-            GitLab.Project.Delete(CurrentConfig, _Project);
-            this.RefreshProjects();
-        }
-
-        /// <summary>
-        /// GitLab Project Class
-        /// </summary>
-        /// <remarks>
-        /// See https://gitlab.com/help/api/projects.md for reference
-        /// </remarks>
-        public  partial class Project : object
-        {
-            public string name
-                , name_with_namespace
-                , path
-                , path_with_namespace
-                , description
-                , default_branch
-                , import_url
-                , ssh_url_to_repo
-                , http_url_to_repo
-                , web_url
-                , created_at
-                , last_activity_at
-                , avatar_url;
-            public string[] tag_list;
-            public int id, namespace_id, visibility_level, creator_id, star_count, forks_count;
-            public bool issues_enabled, merge_requests_enabled, wiki_enabled, snippets_enabled , builds_enabled, archived;
-            public Owner owner;
-            public Namespace NameSpace;
-
             /// <summary>
             /// Creates a new project
             /// </summary>
@@ -108,8 +47,8 @@ namespace GitLab
             /// <returns></returns>
             public static Project Update(Config _Config, Project _Project)
             {
-                HttpResponse<string> R = Unirest.put(_Config.APIUrl + "projects/"+_Project.id.ToString()
-                                        +"?name=" + HttpUtility.UrlEncode(_Project.name)
+                HttpResponse<string> R = Unirest.put(_Config.APIUrl + "projects/" + _Project.id.ToString()
+                                        + "?name=" + HttpUtility.UrlEncode(_Project.name)
                                         + "&path=" + HttpUtility.UrlEncode(_Project.path)
                                         + "&description=" + HttpUtility.UrlEncode(_Project.description)
                                         + "&default_branch=" + HttpUtility.UrlEncode(_Project.default_branch)
@@ -139,7 +78,7 @@ namespace GitLab
             /// <param name="_Project"></param>
             public static void Delete(Config _Config, Project _Project)
             {
-                HttpResponse<string> R = Unirest.delete(_Config.APIUrl + "projects/" + _Project.id.ToString())                                        
+                HttpResponse<string> R = Unirest.delete(_Config.APIUrl + "projects/" + _Project.id.ToString())
                                         .header("accept", "application/json")
                                         .header("PRIVATE-TOKEN", _Config.APIKey)
                                         .asString();
@@ -161,12 +100,12 @@ namespace GitLab
 
                 try
                 {
-                    int page = 1;                    
+                    int page = 1;
                     List<Project> projects = new List<Project>();
-                    
+
                     do
                     {
-                        HttpResponse<string> R =  Unirest.get
+                        HttpResponse<string> R = Unirest.get
                                 (_Config.APIUrl + "projects?per_page=100"
                                 + "&page=" + page.ToString())
                                 .header("accept", "application/json")
@@ -185,7 +124,7 @@ namespace GitLab
                                 JArray ResultArray = (JArray)Result;
                                 foreach (JToken Token in ResultArray)
                                 {
-                                 //   Console.WriteLine(Token.ToString());
+                                    //   Console.WriteLine(Token.ToString());
                                     Project P = JsonConvert.DeserializeObject<Project>(Token.ToString());
                                     projects.Add(P);
                                 }
@@ -201,8 +140,8 @@ namespace GitLab
                 {
                     throw ex;
                 }
-                return RetVal;            
-        }
+                return RetVal;
+            }
 
             /// <summary>
             /// Query projects by name
@@ -221,8 +160,8 @@ namespace GitLab
                     do
                     {
                         HttpResponse<string> R = Unirest.get
-                                (_Config.APIUrl + "projects/search/"+HttpUtility.UrlEncode(Query)
-                                +"?per_page=100"
+                                (_Config.APIUrl + "projects/search/" + HttpUtility.UrlEncode(Query)
+                                + "?per_page=100"
                                 + "&page=" + page.ToString())
                                 .header("accept", "application/json")
                                 .header("PRIVATE-TOKEN", _Config.APIKey)
@@ -259,27 +198,125 @@ namespace GitLab
             }
 
             /// <summary>
-            /// Project Visibility Level as enum for ease of use;
+            /// Get a list of project members viewable by the authenticated user.
             /// </summary>
-            public enum VisibilityLevel
+            /// <param name="_Config"></param>
+            /// <param name="_Project"></param>
+            /// <returns></returns>
+            public static List<Member> ListMembers(Config _Config, Project _Project)
             {
-                Private = 0
-                , Internal = 10
-                , Public = 20
+                List<Member> RetVal = new List<Member>();
+
+                try
+                {
+                    int page = 1;
+                    List<Member> members = new List<Member>();
+
+                    do
+                    {
+                        string URI = (_Config.APIUrl + "projects/" + _Project.id.ToString() + "/members"
+                                + "?per_page=100"
+                                + "&page=" + page.ToString());
+
+
+                        HttpResponse<string> R = Unirest.get(URI)
+                                .header("accept", "application/json")
+                                .header("PRIVATE-TOKEN", _Config.APIKey)
+                                .asString();
+
+                        if (R.Code < 200 | R.Code >= 300)
+                        {
+                            throw new GitLabServerErrorException(R.Body, R.Code);
+                        }
+                        else
+                        {
+                            dynamic Result = JsonConvert.DeserializeObject(R.Body);
+                            if (Result is JArray)
+                            {
+                                JArray ResultArray = (JArray)Result;
+                                foreach (JToken Token in ResultArray)
+                                {
+                                    Member M = JsonConvert.DeserializeObject<Member>(Token.ToString());
+                                    members.Add(M);
+                                }
+                            }
+                        }
+                        page++;
+                        RetVal.AddRange(members);
+                        members = new List<Member>();
+                    }
+                    while (members.Count > 0 & page < 100);
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+                return RetVal;
             }
 
             /// <summary>
-            /// Project owner sub-class so that owner can be parsed from JSON
+            /// Adds a user to the list of project members.
             /// </summary>
-            public class Owner
+            /// <param name="_Config"></param>
+            /// <param name="_Project"></param>
+            /// <param name="_User"></param>
+            /// <param name="_AccessLevel"></param>
+            public static void AddMember(Config _Config, Project _Project, User _User, Member.AccessLevel _AccessLevel)
             {
-                public int id;
-                public string name, created_at;
+                string URI = _Config.APIUrl + "projects/" + _Project.id.ToString() + "/members/?user_id=" + _User.id + "&access_level=" + Convert.ToInt64(_AccessLevel);
+
+                HttpResponse<string> R = Unirest.post(URI)
+                                        .header("accept", "application/json")
+                                        .header("PRIVATE-TOKEN", _Config.APIKey)
+                                        .asString();
+
+                if (R.Code < 200 | R.Code >= 300)
+                {
+                    throw new GitLabServerErrorException(R.Body, R.Code);
+                }
             }
 
-            new public string ToString()
+            /// <summary>
+            /// Updates a project team member to a specified access level.
+            /// </summary>
+            /// <param name="_Config"></param>
+            /// <param name="_Project"></param>
+            /// <param name="_User"></param>
+            /// <param name="_AccessLevel"></param>
+            public static void UpdateMember(Config _Config, Project _Project, User _User, Member.AccessLevel _AccessLevel)
             {
-                return this.name_with_namespace;
+                string URI = _Config.APIUrl + "projects/" + _Project.id.ToString() + "/members/" + _User.id + "?access_level=" + Convert.ToInt64(_AccessLevel);
+
+                HttpResponse<string> R = Unirest.put(URI)
+                                        .header("accept", "application/json")
+                                        .header("PRIVATE-TOKEN", _Config.APIKey)
+                                        .asString();
+
+                if (R.Code < 200 | R.Code >= 300)
+                {
+                    throw new GitLabServerErrorException(R.Body, R.Code);
+                }
+            }
+
+            /// <summary>
+            /// Removes a user from a project team.
+            /// </summary>
+            /// <param name="_Config"></param>
+            /// <param name="_Project"></param>
+            /// <param name="_User"></param>
+            public static void DeleteMember(Config _Config, Project _Project, User _User)
+            {
+                string URI = _Config.APIUrl + "projects/" + _Project.id.ToString() + "/members/" + _User.id;
+
+                HttpResponse<string> R = Unirest.delete(URI)
+                                        .header("accept", "application/json")
+                                        .header("PRIVATE-TOKEN", _Config.APIKey)
+                                        .asString();
+
+                if (R.Code < 200 | R.Code >= 300)
+                {
+                    throw new GitLabServerErrorException(R.Body, R.Code);
+                }
             }
         }
     }
