@@ -97,7 +97,7 @@
   <ItemGroup>
     <Compile Include="Config.cs" />
     <Compile Include="Types\Projects\Project.Branch.cs" />
-    <Compile Include="Types\Commit.cs" />
+    <Compile Include="Types\Repositories\Commit.cs" />
     <Compile Include="Types\DeployKey.cs" />
     <Compile Include="Types\Repositories\File.cs" />
     <Compile Include="Types\Exceptions.cs" />

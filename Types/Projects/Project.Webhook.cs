@@ -11,11 +11,41 @@ namespace GitLab
     {
         partial class Project
         {
+
+            private List<Webhook> _Webhooks;
+                
+            public List<Webhook> Webhooks
+            {
+                get
+                {
+                    if (_Webhooks == null)
+                        RefreshWebhooks();
+                    return _Webhooks;
+                }
+            }
+
+            public void RefreshWebhooks()
+            {
+                if (_Parent != null)
+                    _Webhooks = Webhook.List(Parent.CurrentConfig, this);
+            }
+
             public partial class Webhook
             {
                 public int id, project_id;
                 public string url, created_at;
                 public bool push_events, tag_push_events, issues_events, merge_requests_events, note_events, enable_ssl_verification;
+
+                public Project Parent
+                {
+                    get
+                    {
+                        return _Parent;
+                    }
+                }
+
+                internal Project _Parent;
+
 
                 /// <summary>
                 /// List all webhooks for a project
