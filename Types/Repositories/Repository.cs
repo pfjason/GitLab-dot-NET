@@ -2,7 +2,7 @@
 {
     public partial class GitLab
     {
-        class MergeRequest
+        public partial class Repository
         {
         }
     }

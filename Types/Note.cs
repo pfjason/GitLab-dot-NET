@@ -2,7 +2,10 @@
 {
     public partial class GitLab
     {
-        class Note
+        /// <summary>
+        /// Generic class for comments in various GitLab objects
+        /// </summary>
+        public class Note
         {
         }
     }

@@ -1,0 +1,280 @@
+﻿using System;
+using System.Collections.Generic;
+using Newtonsoft.Json;
+using unirest_net.http;
+using System.Web;
+using Newtonsoft.Json.Linq;
+
+namespace GitLab
+{
+    public partial class GitLab
+    {
+        public partial class Project
+        {
+            class MergeRequest
+            {
+                public int id, iid, project_id, source_project_id, target_project_id;
+                /// <summary>
+                /// With GitLab 8.2 the return fields upvotes and downvotes are deprecated and always return 0 
+                /// </summary>
+                public int upvotes;
+                /// <summary>
+                /// With GitLab 8.2 the return fields upvotes and downvotes are deprecated and always return 0
+                /// </summary>
+                public int downvotes;
+                public string target_branch, source_branch, title, state, description;
+                public string[] labels;
+                public Milestone milestone;
+                public Repository.Diff[] files;
+                User author;
+                User assignee;
+                public bool work_in_progress;
+
+                public enum StateEvent
+                {
+                    None, Close, Reopen, Merge
+                }
+
+                /// <summary>
+                /// List all merge requests
+                /// </summary>
+                /// <param name="_Config"></param>
+                /// <param name="_Project"></param>
+                /// <returns></returns>
+                public static List<MergeRequest> List(Config _Config, Project _Project)
+                {
+                    List<MergeRequest> RetVal = new List<MergeRequest>();
+
+                    try
+                    {
+                        int page = 1;
+                        List<MergeRequest> mergerequests = new List<MergeRequest>();
+
+                        do
+                        {
+                            string URI = _Config.APIUrl + "projects/" + _Project.id + "/merge_requests";
+                            URI += "?per_page=100" + "&page=" + page.ToString();
+
+                            HttpResponse<string> R = Unirest.get(URI)
+                                    .header("accept", "application/json")
+                                    .header("PRIVATE-TOKEN", _Config.APIKey)
+                                    .asString();
+
+                            if (R.Code < 200 | R.Code >= 300)
+                            {
+                                throw new GitLabServerErrorException(R.Body, R.Code);
+                            }
+                            else
+                            {
+                                dynamic Result = JsonConvert.DeserializeObject(R.Body);
+                                if (Result is JArray)
+                                {
+                                    JArray ResultArray = (JArray)Result;
+                                    foreach (JToken Token in ResultArray)
+                                    {
+                                        MergeRequest W = JsonConvert.DeserializeObject<MergeRequest>(Token.ToString());
+                                        mergerequests.Add(W);
+                                    }
+                                }
+                            }
+                            page++;
+                            RetVal.AddRange(mergerequests);
+                            mergerequests = new List<MergeRequest>();
+                        }
+                        while (mergerequests.Count > 0 & page < 100);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw ex;
+                    }
+                    return RetVal;
+                }
+
+                /// <summary>
+                /// 
+                /// </summary>
+                /// <param name="_Config"></param>
+                /// <param name="_Project"></param>
+                /// <param name="_ID"></param>
+                /// <param name="_WithChanges">Get MergeRequest with associated changes. See https://gitlab.com/help/api/merge_requests.md#get-single-mr-changes</param>
+                /// <returns></returns>
+                public static MergeRequest Get(Config _Config, Project _Project, int _ID, bool _WithChanges = false)
+                {
+                    MergeRequest RetVal;
+                    try
+                    {
+                        string URI = _Config.APIUrl + "/projects/" + _Project.id + "/merge_request/" + _ID.ToString();
+
+                        if (_WithChanges)
+                            URI += "/changes";
+
+                        HttpResponse<string> R = Unirest.get(URI)
+                                    .header("accept", "application/json")
+                                    .header("PRIVATE-TOKEN", _Config.APIKey)
+                                    .asString();
+
+                        if (R.Code < 200 | R.Code >= 300)
+                        {
+                            throw new GitLabServerErrorException(R.Body, R.Code);
+                        }
+                        else
+                        {
+                            RetVal = JsonConvert.DeserializeObject<MergeRequest>(R.Body.ToString());
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw ex;
+                    }
+                    return RetVal;
+                }
+
+                /// <summary>
+                /// Creates a new merge request.
+                /// </summary>
+                /// <param name="_Config"></param>
+                /// <param name="_Project"></param>
+                /// <param name="_SourceBranch">The source branch</param>
+                /// <param name="_TargetBranch">The target branch</param>
+                /// <param name="_Title">Title of MR</param>
+                /// <param name="_Description">Description of MR</param>
+                /// <param name="_Asignee">Assignee user </param>
+                /// <param name="_TargetProject">The target project</param>
+                /// <param name="_Labels">Labels for MR as a comma-separated list</param>
+                /// <returns></returns>
+                public static MergeRequest Create(Config _Config, Project _Project, string _SourceBranch, string _TargetBranch, string _Title
+                    , string _Description=null, User _Asignee = null, Project _TargetProject = null, string _Labels=null )
+                {
+                    MergeRequest RetVal;
+                    try
+                    {
+                        string URI = _Config.APIUrl + "/projects/" + _Project.id + "/merge_requests"
+                            + "?source_branch=" + HttpUtility.UrlEncode(_SourceBranch)
+                            + "&target_branch=" + HttpUtility.UrlEncode(_TargetBranch)
+                            + "&title=" + HttpUtility.UrlEncode(_Title);
+
+                        if (_Asignee != null)
+                            URI += "&assignee_id=" + _Asignee.id.ToString();
+                        if (_Description != null)
+                            URI += "&description=" + HttpUtility.UrlEncode(_Description);
+                        if (_TargetProject != null)
+                            URI += "&target_project_id=" + _TargetProject.id.ToString();
+                        if (_Labels != null)
+                            URI += "&labels=" + HttpUtility.UrlEncode(_Labels);
+
+                        HttpResponse<string> R = Unirest.post(URI)
+                                    .header("accept", "application/json")
+                                    .header("PRIVATE-TOKEN", _Config.APIKey)
+                                    .asString();
+
+                        if (R.Code < 200 | R.Code >= 300)
+                        {
+                            throw new GitLabServerErrorException(R.Body, R.Code);
+                        }
+                        else
+                        {
+                            RetVal = JsonConvert.DeserializeObject<MergeRequest>(R.Body.ToString());
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw ex;
+                    }
+                    return RetVal;
+                }
+
+                /// <summary>
+                /// Update Merge Request
+                /// </summary>
+                /// <param name="_Config"></param>
+                /// <param name="_MergeRequest"></param>
+                /// <param name="_TargetBranch"></param>
+                /// <param name="_Title"></param>
+                /// <param name="_Description"></param>
+                /// <param name="_Asignee"></param>
+                /// <param name="_Labels"></param>
+                /// <returns></returns>
+                public static MergeRequest Update(Config _Config, MergeRequest _MergeRequest, string _TargetBranch =null, string _Title=null
+                  , string _Description = null, User _Asignee = null, string _Labels = null, StateEvent _StateEvent = StateEvent.None)
+                {
+                    MergeRequest RetVal;
+                    try
+                    {
+                        string URI = _Config.APIUrl + "/projects/" + _MergeRequest.project_id + "/merge_request/" + _MergeRequest.id + "?";
+
+                        if (_TargetBranch != null)
+                            URI += "&target_branch=" + HttpUtility.UrlEncode(_TargetBranch);
+                        if(_Title != null)
+                            URI += "&title=" + HttpUtility.UrlEncode(_Title);
+                        if (_Asignee != null)
+                            URI += "&assignee_id=" + _Asignee.id.ToString();
+                        if (_Description != null)
+                            URI += "&description=" + HttpUtility.UrlEncode(_Description);                        
+                        if (_Labels != null)
+                            URI += "&labels=" + HttpUtility.UrlEncode(_Labels);
+                        if (_StateEvent != StateEvent.None)
+                            URI += "&state_event=" + _StateEvent.ToString().ToLowerInvariant();
+
+                        HttpResponse<string> R = Unirest.put(URI)
+                                    .header("accept", "application/json")
+                                    .header("PRIVATE-TOKEN", _Config.APIKey)
+                                    .asString();
+
+                        if (R.Code < 200 | R.Code >= 300)
+                        {
+                            throw new GitLabServerErrorException(R.Body, R.Code);
+                        }
+                        else
+                        {
+                            RetVal = JsonConvert.DeserializeObject<MergeRequest>(R.Body.ToString());
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw ex;
+                    }
+                    return RetVal;
+                }
+
+                /// <summary>
+                /// Accepts the specified MergeRequest.
+                /// </summary>
+                /// <param name="_Config">The configuration.</param>
+                /// <param name="_MergeRequest">The merge request.</param>
+                /// <param name="_CommitMessage">The commit message (Optional).</param>
+                /// <returns></returns>
+                /// <exception cref="GitLabServerErrorException"></exception>
+                public static MergeRequest Accept(Config _Config, MergeRequest _MergeRequest, string _CommitMessage = null)
+                {
+                    MergeRequest RetVal;
+                    try
+                    {
+                        string URI = _Config.APIUrl + "/projects/" + _MergeRequest.project_id + "/merge_request/" + _MergeRequest.id + "/merge?";
+
+                        if (_CommitMessage != null)
+                            URI += "&merge_commit_message=" + HttpUtility.UrlEncode(_CommitMessage);                       
+
+                        HttpResponse<string> R = Unirest.put(URI)
+                                    .header("accept", "application/json")
+                                    .header("PRIVATE-TOKEN", _Config.APIKey)
+                                    .asString();
+
+                        if (R.Code < 200 | R.Code >= 300)
+                        {
+                            throw new GitLabServerErrorException(R.Body, R.Code);
+                        }
+                        else
+                        {
+                            RetVal = JsonConvert.DeserializeObject<MergeRequest>(R.Body.ToString());
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw ex;
+                    }
+                    return RetVal;
+                }
+            }
+        }
+    }
+}
