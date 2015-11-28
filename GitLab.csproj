@@ -105,8 +105,9 @@
     <Compile Include="Types\Groups\Group.Members.cs" />
     <Compile Include="Types\Groups\Group.StaticMethods.cs" />
     <Compile Include="Types\Issue.cs" />
-    <Compile Include="Types\Key.cs" />
-    <Compile Include="Types\Label.cs" />
+    <Compile Include="Types\Users\Email.StaticFunctions.cs" />
+    <Compile Include="Types\Users\SSHKey.cs" />
+    <Compile Include="Types\Projects\Project.Label.cs" />
     <Compile Include="Types\Member.cs" />
     <Compile Include="Types\MergeRequest.cs" />
     <Compile Include="Types\Milestone.cs" />
@@ -121,7 +122,9 @@
     <Compile Include="Types\Snippet.cs" />
     <Compile Include="Types\SystemHook.cs" />
     <Compile Include="Types\Tag.cs" />
-    <Compile Include="Types\User.cs" />
+    <Compile Include="Types\Users\Email.cs" />
+    <Compile Include="Types\Users\SSHKey.StaticFunctions.cs" />
+    <Compile Include="Types\Users\User.cs" />
     <Compile Include="Windows Forms\ConfigurationForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -142,6 +145,7 @@
     <None Include="app.config" />
     <None Include="packages.config" />
     <Compile Include="Types\Projects\Project.StaticMethods.cs" />
+    <Compile Include="Types\Users\Users.StaticMembers.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Windows Forms\ConfigurationForm.resx">
