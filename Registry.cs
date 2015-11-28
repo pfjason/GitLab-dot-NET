@@ -1,6 +1,4 @@
 ﻿using System;
-using System.IO;
-using System.Collections.ObjectModel;
 using Microsoft.Win32;
 
 namespace GitLab

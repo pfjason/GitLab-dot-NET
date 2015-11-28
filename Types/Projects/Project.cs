@@ -1,9 +1,4 @@
-﻿using System;
-using Newtonsoft.Json;
-using unirest_net.http;
-using System.Web;
-using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
+﻿using System.Collections.Generic;
 
 namespace GitLab
 {

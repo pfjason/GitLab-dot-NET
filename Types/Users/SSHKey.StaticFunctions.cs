@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using unirest_net.http;
 using System.Web;
@@ -120,7 +117,7 @@ namespace GitLab
 
             /// <summary>
             /// Adds SSH key to user account. If _User is null adds for current user. 
-            /// </summary>
+            /// </summary>            
             /// <param name="_Config"></param>
             /// <param name="_SSHKey"></param>
             /// <param name="_User"></param>
