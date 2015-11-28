@@ -91,14 +91,13 @@ namespace GitLab
                     string URI = _Config.APIUrl;
 
                     if (_User == null)
-                        URI += "user/keys";
+                        URI += "user/keys/";
                     else
-                        URI += "users/" + _User.id.ToString() + "/keys";
+                        URI += "users/" + _User.id.ToString() + "/keys/";
 
-                    URI += "?title=" + HttpUtility.UrlEncode(_SSHKey.title)
-                     + "&key=" + HttpUtility.UrlEncode(_SSHKey.key);
-
-                    HttpResponse<string> R = Unirest.post(URI)
+                    URI +=  _id.ToString();
+                    
+                    HttpResponse<string> R = Unirest.get(URI)
                                 .header("accept", "application/json")
                                 .header("PRIVATE-TOKEN", _Config.APIKey)
                                 .asString();
