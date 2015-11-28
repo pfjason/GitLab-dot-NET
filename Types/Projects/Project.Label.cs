@@ -115,7 +115,7 @@ namespace GitLab
                 /// <returns></returns>
                 public static Label Update(Config _Config, Project _Project, Label _Label, string _NewName = null, string _NewColor = null)
                 {
-                    if (_NewName == null && _Color == null)
+                    if (_NewName == null && _NewColor == null)
                         throw new ArgumentException("Color or New Name must be specified.");
 
                     string URI = _Config.APIUrl + "projects/" + _Project.id.ToString() + "/labels/"

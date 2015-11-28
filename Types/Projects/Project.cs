@@ -107,7 +107,8 @@ namespace GitLab
             /// </summary>
             public enum VisibilityLevel
             {
-                Private = 0
+                Undefined = -1
+                , Private = 0
                 , Internal = 10
                 , Public = 20
             }
