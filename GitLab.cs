@@ -33,6 +33,9 @@ namespace GitLab
         {
             RefreshProjects();
             RefreshGroups();
+            RefreshUsers();
+            RefreshCurrentUser();
+
         }        
     }
 }

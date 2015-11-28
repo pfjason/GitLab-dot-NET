@@ -10,13 +10,10 @@ using Newtonsoft.Json.Linq;
 
 namespace GitLab
 {
-    public partial class GitLab
+    partial class GitLab
     {
-        public class SSHKey
+        partial class SSHKey
         {
-            public int id;
-            public string title, key, created_at;
-            public User user;
 
             /// <summary>
             /// Gets list of SSH Keys for a user. Gets keys for the current user if _User is null.
@@ -41,7 +38,7 @@ namespace GitLab
                             URI += "user/keys";
                         else
                             URI += "users/" + _User.id.ToString() + "/keys";
-                            
+
                         URI += "?per_page=100" + "&page=" + page.ToString();
 
                         HttpResponse<string> R = Unirest.get(URI)
@@ -121,15 +118,15 @@ namespace GitLab
                 }
                 return RetVal;
             }
-            
+
             /// <summary>
             /// Adds SSH key to user account. If _User is null adds for current user. 
             /// </summary>
             /// <param name="_Config"></param>
             /// <param name="_SSHKey"></param>
             /// <param name="_User"></param>
-            public static void Add (Config _Config, SSHKey _SSHKey, User _User = null)                 
-            {               
+            public static void Add(Config _Config, SSHKey _SSHKey, User _User = null)
+            {
                 try
                 {
                     string URI = _Config.APIUrl;

@@ -80,10 +80,12 @@ namespace GitLab
 
                 try
                 {
-                    string URI = _Config.APIUrl + "users/";
+                    string URI = _Config.APIUrl;
 
-					if(_id < 0)
-                        URI += _id.ToString();
+                    if (_id > 0)
+                        URI += "users/" + _id.ToString();
+                    else
+                        URI += "user/";
 
                     HttpResponse<string> R = Unirest.get(URI)
                                 .header("accept", "application/json")
@@ -111,8 +113,10 @@ namespace GitLab
             /// </summary>
             /// <param name="_Config">A GitLab.NET Configuration object</param>
             /// <param name="_User">User object to create on the server</param>
-            public static void Create(Config _Config, User _User, string Password, bool RequireConfirmation = true)
+            public static User Create(Config _Config, User _User, string Password, bool RequireConfirmation = true)
             {
+                User RetVal = null;
+
                 string URI = _Config.APIUrl + "users?"
                      + "email=" + HttpUtility.UrlEncode(_User.email)
                      + "&password=" + HttpUtility.UrlEncode(Password)
@@ -146,6 +150,12 @@ namespace GitLab
                 {
                     throw new GitLabServerErrorException(R.Body, R.Code);
                 }               
+                else
+                {
+                    RetVal = JsonConvert.DeserializeObject<User>(R.Body);
+                }
+
+                return RetVal;
             }
 
             /// <summary>
@@ -271,6 +281,7 @@ namespace GitLab
                     throw ex;
                 }
             }
+
         }
     }
 }
