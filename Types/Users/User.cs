@@ -89,7 +89,9 @@ namespace GitLab
                 , extern_uid
                 , provider
                 , avatar_url
-                , current_sign_in_at;
+                , current_sign_in_at
+                , private_token;
+
             public int id = -1, color_scheme_id = -1, theme_id = -1, projects_limit = -1;
             public bool two_factor_enabled = false, can_create_group = false, is_admin = false;
 

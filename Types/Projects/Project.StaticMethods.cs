@@ -144,6 +144,43 @@ namespace GitLab
             }
 
             /// <summary>
+            /// Get single project by numeric ID
+            /// </summary>
+            /// <param name="_Config"></param>
+            /// <param name="_id"></param>
+            /// <returns></returns>
+            public static Project Get(Config _Config, int _id)
+            {
+                Project RetVal = null;
+
+                try
+                {
+                    string URI = _Config.APIUrl + "projects/" + _id.ToString();
+
+                    HttpResponse<string> R = Unirest.get(URI)
+                                .header("accept", "application/json")
+                                .header("PRIVATE-TOKEN", _Config.APIKey)
+                                .asString();
+
+                    if (R.Code < 200 | R.Code >= 300)
+                    {
+                        throw new GitLabServerErrorException(R.Body, R.Code);
+                    }
+                    else
+                    {
+                        RetVal = JsonConvert.DeserializeObject<Project>(R.Body.ToString());
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+                return RetVal;
+            }
+
+
+            /// <summary>
             /// Query projects by name
             /// </summary>
             /// <param name="_Config"></param>
