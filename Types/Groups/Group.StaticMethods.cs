@@ -286,8 +286,8 @@ namespace GitLab
             /// Transfer a project to the Group namespace. Available only for admin
             /// </summary>
             /// <param name="_Config"></param>
-            /// <param name="_Group"></param>
-            /// <param name="_Project"></param>
+            /// <param name="_Group">Group to transfer project to</param>
+            /// <param name="_Project">Project to be transferred</param>
             public static void TransferProject(Config _Config, Group _Group, Project _Project)
             {
                 string URI = _Config.APIUrl + "groups/" + _Group.id.ToString() + "/projects/" + _Project.id;
