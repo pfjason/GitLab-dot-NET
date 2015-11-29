@@ -97,9 +97,9 @@
   <ItemGroup>
     <Compile Include="Config.cs" />
     <Compile Include="Types\Projects\Project.Branch.cs" />
-    <Compile Include="Types\Repositories\Commit.cs" />
+    <Compile Include="Types\Repositories\Repository.Commit.cs" />
     <Compile Include="Types\DeployKey.cs" />
-    <Compile Include="Types\Repositories\File.cs" />
+    <Compile Include="Types\Repositories\Repository.File.cs" />
     <Compile Include="Types\Exceptions.cs" />
     <Compile Include="Types\Groups\Group.cs" />
     <Compile Include="Types\Groups\Group.Members.cs" />
@@ -107,8 +107,8 @@
     <Compile Include="Types\Issue.cs" />
     <Compile Include="Types\Projects\Project.Webhook.cs" />
     <Compile Include="Types\Repositories\Repository.Diff.cs" />
-    <Compile Include="Types\Users\Email.StaticFunctions.cs" />
-    <Compile Include="Types\Users\SSHKey.cs" />
+    <Compile Include="Types\Users\User.Email.StaticFunctions.cs" />
+    <Compile Include="Types\Users\User.SSHKey.cs" />
     <Compile Include="Types\Projects\Project.Label.cs" />
     <Compile Include="Types\Member.cs" />
     <Compile Include="Types\Projects\Project.MergeRequest.cs" />
@@ -124,8 +124,8 @@
     <Compile Include="Types\Projects\Project.Snippet.cs" />
     <Compile Include="Types\SystemHook.cs" />
     <Compile Include="Types\Tag.cs" />
-    <Compile Include="Types\Users\Email.cs" />
-    <Compile Include="Types\Users\SSHKey.StaticFunctions.cs" />
+    <Compile Include="Types\Users\User.Email.cs" />
+    <Compile Include="Types\Users\User.SSHKey.StaticFunctions.cs" />
     <Compile Include="Types\Users\User.cs" />
     <Compile Include="Windows Forms\ConfigurationForm.cs">
       <SubType>Form</SubType>
@@ -147,7 +147,7 @@
     <None Include="app.config" />
     <None Include="packages.config" />
     <Compile Include="Types\Projects\Project.StaticMethods.cs" />
-    <Compile Include="Types\Users\Users.StaticMembers.cs" />
+    <Compile Include="Types\Users\User.StaticMembers.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Windows Forms\ConfigurationForm.resx">
