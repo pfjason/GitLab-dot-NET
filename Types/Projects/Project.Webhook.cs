@@ -14,59 +14,18 @@ namespace GitLab
             /// <summary>
             /// The webhooks that belong to this project.
             /// </summary>
-            private List<Webhook> _Webhooks;
+            private WebhookList _Webhooks;
                 
-            public List<Webhook> Webhooks
+            public WebhookList Webhooks
             {
                 get
                 {
                     if (_Webhooks == null)
-                        RefreshWebhooks();
-                    return _Webhooks;
+                        _Webhooks = new WebhookList(this);
+                    return _Webhooks;                    
                 }
-            }
-
-            public void RefreshWebhooks()
-            {
-                if (_Parent != null)
-                    _Webhooks = Webhook.List(Parent.CurrentConfig, this);
-            }
-
-            /// <summary>
-            /// Adds webhook to this project.
-            /// </summary>
-            /// <param name="_Webhook">The webhook</param>
-            /// <exception cref="GitLabStaticAccessException">Unable to add webhook without Parent GitLab object.</exception>
-/            public void AddWebhook(Webhook _Webhook)
-            {
-                if (Parent != null)
-                {
-                    Webhook.Add(this.Parent.CurrentConfig, _Webhook, this);
-                    RefreshWebhooks();
-                }
-                else
-                {
-                    throw new GitLabStaticAccessException("Unable to add webhook without Parent GitLab object.");
-                }
-            }
-
-            /// <summary>
-            /// Deletes the webhook from this project
-            /// </summary>
-            /// <param name="_Webhook">The webhook.</param>
-            public void DeleteWebhook(Webhook _Webhook)
-            {
-                if (Parent != null)
-                {
-                    Webhook.Delete(this.Parent.CurrentConfig, _Webhook, this);
-                    RefreshWebhooks();
-                }
-                else
-                {
-                    throw new GitLabStaticAccessException("Unable to delete webhook without Parent GitLab object.");
-                }
-            }
-
+            }                      
+         
             public partial class Webhook
             {
                 public int id, project_id;
@@ -97,7 +56,6 @@ namespace GitLab
                         throw new GitLabStaticAccessException("Unable to save Webhook without parent project");
                     }
                 }
-
 
                 /// <summary>
                 /// List all webhooks for a project
@@ -289,7 +247,54 @@ namespace GitLab
                         throw ex;
                     }
                 }
+            }
 
+            public class WebhookList : List<Webhook>
+            {
+                Project Parent;
+
+                public WebhookList(Project _Parent)
+                {
+                    Parent = _Parent;
+                    RefreshItems();
+                }
+
+                public void RefreshItems()
+                {
+                    if (Parent != null)
+                    {
+                        this.Clear();
+
+                        foreach (Webhook W in Webhook.List(Parent.Parent.CurrentConfig, Parent))
+                        {
+                            base.Add(W);
+                        }
+                    }
+                    else
+                        throw new GitLabStaticAccessException("No Parent Project for operation");
+                }
+
+                new public void Add(Webhook _Webhook)
+                {
+                    if (Parent != null)
+                    {
+                        Webhook.Add(Parent.Parent.CurrentConfig, _Webhook, Parent);
+                        RefreshItems();
+                    }
+                    else
+                        throw new GitLabStaticAccessException("No parent project available for operation.");
+                }
+
+                new public void Remove(Webhook _Webhook)
+                {
+                    if (Parent != null)
+                    {
+                        Webhook.Delete(Parent.Parent.CurrentConfig, _Webhook, Parent);
+                        RefreshItems();
+                    }
+                    else
+                        throw new GitLabStaticAccessException("No parent project available for operation.");
+                }
             }
         }
     }

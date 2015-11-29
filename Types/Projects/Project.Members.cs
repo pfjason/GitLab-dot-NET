@@ -14,7 +14,7 @@ namespace GitLab
                     if (this.Parent != null)
                     {
                         Project.UpdateMember(this.Parent.Parent.CurrentConfig, this.Parent, _Member, _AccessLevel);
-                        RefreshMembers();
+                        RefreshItems();
                     }
                     else throw new GitLabStaticAccessException("Unable to set Access Level without Parent GitLab object");
                 }
@@ -29,13 +29,13 @@ namespace GitLab
                 public ProjectMemberList(Project _parent)
                 {
                     _Parent = _parent;
-                    RefreshMembers();
+                    RefreshItems();
                 }                
 
                 /// <summary>
                 /// Refreshes project members as long as Parent GitLab object is not null
                 /// </summary>
-                public void RefreshMembers()
+                public void RefreshItems()
                 {
                     if (Parent != null)
                     {
@@ -56,14 +56,14 @@ namespace GitLab
                 new public void Add(Member M)
                 {
                     GitLab.Project.AddMember(Parent.Parent.CurrentConfig, this.Parent, M, M.access_level);
-                    RefreshMembers();
+                    RefreshItems();
                     
                 }
 
                 new public void Remove(Member M)
                 {
                     GitLab.Project.DeleteMember(Parent.Parent.CurrentConfig, Parent, M);
-                    RefreshMembers();
+                    RefreshItems();
                 }
             }
 

@@ -13,7 +13,39 @@ namespace GitLab
         {
             class MergeRequest
             {
-                public int id, iid, project_id, source_project_id, target_project_id;
+
+                private Project Parent;               
+
+                internal void SetParent(Project _Project)
+                {
+                    Parent = _Project;
+                }
+
+                /// <summary>
+                /// Accepts the Merge Request.
+                /// </summary>
+                /// <param name="CommitMessage">The commit message.</param>
+                public void Accept(string CommitMessage = null)
+                {
+                    if (Parent != null)
+                    {                        
+                        MergeRequest.Accept(Parent.Parent.CurrentConfig, this, CommitMessage);
+                    }
+                    else
+                        throw new GitLabStaticAccessException("Unable to complete operation without parent project");
+                }
+
+                public void Update(StateEvent _NewState = StateEvent.None)
+                {
+                    if (Parent != null)
+                    {
+                        MergeRequest.Update(Parent.Parent.CurrentConfig, this, this.target_branch, this.title, this.description, this.assignee, labels, _NewState );
+                    }
+                    else
+                        throw new GitLabStaticAccessException("Unable to complete operation without parent project");
+                }
+
+                public int id, iid, project_id, source_project_id, target_project_id = -1;
                 /// <summary>
                 /// With GitLab 8.2 the return fields upvotes and downvotes are deprecated and always return 0 
                 /// </summary>
@@ -26,8 +58,8 @@ namespace GitLab
                 public string[] labels;
                 public Milestone milestone;
                 public Repository.Diff[] files;
-                User author;
-                User assignee;
+                public User author;
+                public User assignee;
                 public bool work_in_progress;
 
                 public enum StateEvent
@@ -75,6 +107,7 @@ namespace GitLab
                                         MergeRequest W = JsonConvert.DeserializeObject<MergeRequest>(Token.ToString());
                                         mergerequests.Add(W);
                                     }
+                                   
                                 }
                             }
                             page++;
@@ -143,11 +176,23 @@ namespace GitLab
                 /// <param name="_Labels">Labels for MR as a comma-separated list</param>
                 /// <returns></returns>
                 public static MergeRequest Create(Config _Config, Project _Project, string _SourceBranch, string _TargetBranch, string _Title
-                    , string _Description=null, User _Asignee = null, Project _TargetProject = null, string _Labels=null )
+                    , string _Description=null, User _Asignee = null, Project _TargetProject = null, string[] _Labels=null )
                 {
                     MergeRequest RetVal;
                     try
                     {
+                        string labels = "";
+                        bool first = true;
+
+                        foreach (string l in _Labels)
+                        {
+                            if (!first)
+                                labels += ",";
+
+                            labels += l;
+                            first = false;
+                        }
+
                         string URI = _Config.APIUrl + "/projects/" + _Project.id + "/merge_requests"
                             + "?source_branch=" + HttpUtility.UrlEncode(_SourceBranch)
                             + "&target_branch=" + HttpUtility.UrlEncode(_TargetBranch)
@@ -160,7 +205,7 @@ namespace GitLab
                         if (_TargetProject != null)
                             URI += "&target_project_id=" + _TargetProject.id.ToString();
                         if (_Labels != null)
-                            URI += "&labels=" + HttpUtility.UrlEncode(_Labels);
+                            URI += "&labels=" + HttpUtility.UrlEncode(labels);
 
                         HttpResponse<string> R = Unirest.post(URI)
                                     .header("accept", "application/json")
@@ -195,11 +240,23 @@ namespace GitLab
                 /// <param name="_Labels"></param>
                 /// <returns></returns>
                 public static MergeRequest Update(Config _Config, MergeRequest _MergeRequest, string _TargetBranch =null, string _Title=null
-                  , string _Description = null, User _Asignee = null, string _Labels = null, StateEvent _StateEvent = StateEvent.None)
+                  , string _Description = null, User _Asignee = null, string[] _Labels = null, StateEvent _StateEvent = StateEvent.None)
                 {
                     MergeRequest RetVal;
                     try
                     {
+                        bool first = true;
+                        string ls = "";
+
+                        foreach (string l in _Labels)
+                        {
+                            if (!first)
+                                ls += ",";
+
+                            ls += l;
+                            first = false;
+                        }
+
                         string URI = _Config.APIUrl + "/projects/" + _MergeRequest.project_id + "/merge_request/" + _MergeRequest.id + "?";
 
                         if (_TargetBranch != null)
@@ -211,7 +268,7 @@ namespace GitLab
                         if (_Description != null)
                             URI += "&description=" + HttpUtility.UrlEncode(_Description);                        
                         if (_Labels != null)
-                            URI += "&labels=" + HttpUtility.UrlEncode(_Labels);
+                            URI += "&labels=" + HttpUtility.UrlEncode(ls);
                         if (_StateEvent != StateEvent.None)
                             URI += "&state_event=" + _StateEvent.ToString().ToLowerInvariant();
 
@@ -273,6 +330,59 @@ namespace GitLab
                         throw ex;
                     }
                     return RetVal;
+                }
+            }
+
+            class MergeRequestList: List<MergeRequest>
+            {
+                private Project Parent;
+
+                public MergeRequestList(Project _Project)
+                {
+                    Parent = _Project;
+                }
+
+                public void RefreshItems()
+                {
+                 
+                    if (Parent != null)
+                    {
+                        this.Clear();
+                        foreach (MergeRequest M in MergeRequest.List(Parent.Parent.CurrentConfig, Parent))
+                        {
+                            base.Add(M);
+                            M.SetParent(Parent);
+                        }
+                    }
+                    else
+                        throw new GitLabStaticAccessException("No parent project available for operation.");
+                }
+
+                new public void Add(MergeRequest _MergeRequest)
+                {
+                    if (Parent != null)
+                    {
+                        Project P = null;
+
+                        if(_MergeRequest.target_project_id != -1)
+                        {
+                            P = new Project();
+                            P.id = _MergeRequest.target_project_id;
+                        }
+
+                        MergeRequest.Create(Parent.Parent.CurrentConfig, Parent, _MergeRequest.source_branch
+                            , _MergeRequest.target_branch, _MergeRequest.title, _MergeRequest.description, _MergeRequest.assignee, P, _MergeRequest.labels);
+
+                        RefreshItems();
+                    }
+                    else
+                        throw new GitLabStaticAccessException("No parent project available for operation.");
+                }
+                
+
+                new public void Remove(MergeRequest _MergeRequest)
+                {
+                    throw new InvalidOperationException("Removing Merge Requests is not supported by the GitLab API.");
                 }
             }
         }

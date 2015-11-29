@@ -25,7 +25,7 @@ namespace GitLab
             /// </summary>
             public class Branch
             {
-                public Commit Commit;
+                public Repository.Commit Commit;
                 public string Name;
                 public bool Protected;
             }

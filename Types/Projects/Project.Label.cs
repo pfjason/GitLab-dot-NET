@@ -11,9 +11,48 @@ namespace GitLab
     {
         public partial class Project
         {
+            private LabelList _Labels;
+
+            public LabelList Labels
+            {
+                get
+                {
+                    if (_Labels == null)
+                        _Labels = new LabelList(this);
+
+                    return _Labels;
+                }
+
+            }
+            
             public class Label
             {
                 public string name, color;
+
+                private Project Parent;
+
+                /// <summary>
+                /// Sets the parent project.
+                /// </summary>
+                /// <param name="_Project">The project.</param>
+                internal void SetParent(Project _Project)
+                {
+                    Parent = _Project;
+                }
+
+                /// <summary>
+                /// Updates this instance.
+                /// </summary>
+                /// <exception cref="GitLabStaticAccessException">No parent project for operation</exception>
+                public void Update()
+                {
+                    if (Parent != null)
+                    {
+                        Label.Update(Parent.Parent.CurrentConfig, Parent, this, this.name, this.color);
+                    }
+                    else
+                        throw new GitLabStaticAccessException("No parent project for operation");
+                }
 
                 /// <summary>
                 /// List all labels associated with a project
@@ -164,6 +203,68 @@ namespace GitLab
 
 
 
+            }
+
+            public class LabelList: List<Label>
+            {
+                private Project Parent;
+
+                public LabelList(Project _Parent)
+                {
+                    Parent = _Parent;
+                }
+
+                /// <summary>
+                /// Refreshes the items in this list from the server
+                /// </summary>
+                /// <exception cref="GitLabStaticAccessException">No parent project available for operation.</exception>
+                public void RefreshItems()
+                {
+                    if (Parent != null)
+                    {
+                        this.Clear();
+                        foreach (Label L in Label.List(Parent.Parent.CurrentConfig, Parent))
+                        {
+                            base.Add(L);
+                            L.SetParent(Parent);
+                        }
+                    }
+                    else
+                        throw new GitLabStaticAccessException("No parent project available for operation.");
+                }
+
+                /// <summary>
+                /// Adds the specified label to the parent project.
+                /// </summary>
+                /// <param name="_Label">The label.</param>
+                /// <exception cref="GitLabStaticAccessException">No parent project available for operation.</exception>
+                new public void Add(Label _Label)
+                {
+                    if (Parent != null)
+                    {
+                        Label.Add(Parent.Parent.CurrentConfig, Parent, _Label.name, _Label.color);
+                        RefreshItems();
+                        
+                    }
+                    else
+                        throw new GitLabStaticAccessException("No parent project available for operation.");
+                }
+
+                /// <summary>
+                /// Removes the specified label.
+                /// </summary>
+                /// <param name="_Label">The label.</param>
+                /// <exception cref="GitLabStaticAccessException">No parent project available for operation.</exception>
+                new public void Remove(Label _Label)
+                {
+                    if (Parent != null)
+                    {
+                        Label.Delete(Parent.Parent.CurrentConfig, Parent, _Label);
+                        RefreshItems();
+                    }
+                    else
+                        throw new GitLabStaticAccessException("No parent project available for operation.");
+                }
             }
         }
     }

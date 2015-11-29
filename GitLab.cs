@@ -28,7 +28,6 @@ namespace GitLab
             RefreshGroups();
             RefreshUsers();
             RefreshCurrentUser();
-
         }
 
         public static GitLab Login(string _URI, string _Login, string _Password, bool _LoginIsEmail = false)
