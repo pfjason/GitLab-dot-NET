@@ -5,7 +5,7 @@ using unirest_net.http;
 using System.Web;
 using Newtonsoft.Json.Linq;
 
-namespace GitLab
+namespace GitLabDotNet
 {
     public partial class GitLab
     {

@@ -6,7 +6,7 @@ using System.Web;
 using Newtonsoft.Json.Linq;
 using System.IO;
 
-namespace GitLab
+namespace GitLabDotNet
 {
     public partial class GitLab
     {

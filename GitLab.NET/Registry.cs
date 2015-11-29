@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Win32;
 
-namespace GitLab
+namespace GitLabDotNet
 {
     public class Registry
     {

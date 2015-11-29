@@ -3,7 +3,7 @@ using unirest_net.http;
 using System.Web;
 using Newtonsoft.Json;
 
-namespace GitLab
+namespace GitLabDotNet
 {
     /// <summary>
     /// Class for interfacing with a GitLab API via .NET
@@ -30,6 +30,15 @@ namespace GitLab
             RefreshCurrentUser();
         }
 
+        /// <summary>
+        /// Login to the specified GitLab URI.
+        /// </summary>
+        /// <param name="_URI">The _ URI.</param>
+        /// <param name="_Login">The _ login.</param>
+        /// <param name="_Password">The _ password.</param>
+        /// <param name="_LoginIsEmail">if set to <c>true</c> [_ login is email].</param>
+        /// <returns>GitLab object with a config set up for the logged in user.</returns>
+        /// <exception cref="GitLab.GitLabServerErrorException"></exception>
         public static GitLab Login(string _URI, string _Login, string _Password, bool _LoginIsEmail = false)
         {
             Config C = new Config();

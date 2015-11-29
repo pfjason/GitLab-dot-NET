@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace GitLab
+namespace GitLabDotNet
 {
     public partial class GitLab
     {

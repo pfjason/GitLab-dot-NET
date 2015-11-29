@@ -2,7 +2,7 @@
 using System;
 using System.Collections.ObjectModel;
 
-namespace GitLab
+namespace GitLabDotNet
 {
     public class Config
     {

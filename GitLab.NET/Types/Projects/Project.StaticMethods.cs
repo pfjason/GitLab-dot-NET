@@ -5,7 +5,7 @@ using System.Web;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 
-namespace GitLab
+namespace GitLabDotNet
 {
     partial class GitLab
     {

@@ -1,4 +1,4 @@
-﻿namespace GitLab
+﻿namespace GitLabDotNet
 {
     public partial class GitLab
     {

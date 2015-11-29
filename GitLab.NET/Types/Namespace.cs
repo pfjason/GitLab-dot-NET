@@ -6,7 +6,7 @@ using System.Web;
 
 
 
-namespace GitLab
+namespace GitLabDotNet
 {
     public partial class GitLab
     {

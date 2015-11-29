@@ -1,4 +1,4 @@
-﻿namespace GitLab
+﻿namespace GitLabDotNet
 {
     /// <summary>
     /// Descriptor class for members of Groups or Projects

@@ -1,4 +1,4 @@
-﻿namespace GitLab
+﻿namespace GitLabDotNet
 {
     public class GitLabServerErrorException : System.Exception
     {
