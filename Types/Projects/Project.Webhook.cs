@@ -11,7 +11,9 @@ namespace GitLab
     {
         partial class Project
         {
-
+            /// <summary>
+            /// The webhooks that belong to this project.
+            /// </summary>
             private List<Webhook> _Webhooks;
                 
             public List<Webhook> Webhooks
@@ -30,6 +32,41 @@ namespace GitLab
                     _Webhooks = Webhook.List(Parent.CurrentConfig, this);
             }
 
+            /// <summary>
+            /// Adds webhook to this project.
+            /// </summary>
+            /// <param name="_Webhook">The webhook</param>
+            /// <exception cref="GitLabStaticAccessException">Unable to add webhook without Parent GitLab object.</exception>
+/            public void AddWebhook(Webhook _Webhook)
+            {
+                if (Parent != null)
+                {
+                    Webhook.Add(this.Parent.CurrentConfig, _Webhook, this);
+                    RefreshWebhooks();
+                }
+                else
+                {
+                    throw new GitLabStaticAccessException("Unable to add webhook without Parent GitLab object.");
+                }
+            }
+
+            /// <summary>
+            /// Deletes the webhook from this project
+            /// </summary>
+            /// <param name="_Webhook">The webhook.</param>
+            public void DeleteWebhook(Webhook _Webhook)
+            {
+                if (Parent != null)
+                {
+                    Webhook.Delete(this.Parent.CurrentConfig, _Webhook, this);
+                    RefreshWebhooks();
+                }
+                else
+                {
+                    throw new GitLabStaticAccessException("Unable to delete webhook without Parent GitLab object.");
+                }
+            }
+
             public partial class Webhook
             {
                 public int id, project_id;
@@ -45,6 +82,21 @@ namespace GitLab
                 }
 
                 internal Project _Parent;
+
+                /// <summary>
+                /// Updates this webhook on the server.
+                /// </summary>
+                public void Update()
+                {
+                    if (Parent != null)
+                    {
+                        Webhook.Update(Parent.Parent.CurrentConfig, this, Parent);
+                    }
+                    else
+                    {
+                        throw new GitLabStaticAccessException("Unable to save Webhook without parent project");
+                    }
+                }
 
 
                 /// <summary>

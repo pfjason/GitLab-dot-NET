@@ -123,7 +123,7 @@
     <Compile Include="Types\Settings.cs" />
     <Compile Include="Types\Projects\Project.Snippet.cs" />
     <Compile Include="Types\SystemHook.cs" />
-    <Compile Include="Types\Tag.cs" />
+    <Compile Include="Types\Repositories\Repository.Tag.cs" />
     <Compile Include="Types\Users\User.Email.cs" />
     <Compile Include="Types\Users\User.SSHKey.StaticFunctions.cs" />
     <Compile Include="Types\Users\User.cs" />
