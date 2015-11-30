@@ -47,7 +47,7 @@ namespace GitLabDotNet
             try
             {
                  string URI = C.APIUrl + "session"                    
-                    + " ?password=" + HttpUtility.UrlEncode(_Password);
+                    + "?password=" + HttpUtility.UrlEncode(_Password);
 
                 if (!_LoginIsEmail)
                     URI += "&login=" + HttpUtility.UrlEncode(_Login);

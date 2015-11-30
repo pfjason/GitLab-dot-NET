@@ -47,7 +47,8 @@ namespace GitLabDotNet
             /// <returns></returns>
             public static Project Update(Config _Config, Project _Project)
             {
-                HttpResponse<string> R = Unirest.put(_Config.APIUrl + "projects/" + _Project.id.ToString()
+
+                string URI = _Config.APIUrl + "projects/" + _Project.id.ToString()
                                         + "?name=" + HttpUtility.UrlEncode(_Project.name)
                                         + "&path=" + HttpUtility.UrlEncode(_Project.path)
                                         + "&description=" + HttpUtility.UrlEncode(_Project.description)
@@ -57,14 +58,16 @@ namespace GitLabDotNet
                                         + "&builds_enabled=" + Convert.ToInt32(_Project.builds_enabled).ToString()
                                         + "&wiki_enabled=" + Convert.ToInt32(_Project.wiki_enabled).ToString()
                                         + "&snippets_enabled=" + Convert.ToInt32(_Project.snippets_enabled).ToString()
-                                        + "&visibility_level=" + Convert.ToInt64(_Project.visibility_level).ToString())
+                                        + "&visibility_level=" + Convert.ToInt64(_Project.visibility_level).ToString();
+
+                HttpResponse<string> R = Unirest.put(URI)
                                         .header("accept", "application/json")
                                         .header("PRIVATE-TOKEN", _Config.APIKey)
                                         .asString();
 
                 if (R.Code < 200 | R.Code >= 300)
                 {
-                    throw new GitLabServerErrorException(R.Body, R.Code);
+                    throw new GitLabServerErrorException(R.Body + " / " + URI, R.Code);
                 }
 
                 Project RetVal = JsonConvert.DeserializeObject<Project>(R.Body);
