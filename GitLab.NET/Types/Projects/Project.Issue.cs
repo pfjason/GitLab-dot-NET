@@ -1,0 +1,219 @@
+﻿using System;
+using System.Collections.Generic;
+using Newtonsoft.Json;
+using unirest_net.http;
+using System.Web;
+using Newtonsoft.Json.Linq;
+
+namespace GitLabDotNet
+{
+    public partial class GitLab
+    {
+        public partial class Project
+        {
+            public class Issue
+            {
+                public int id, iid, project_id;
+                public string[] labels;
+                public Milestone milestone;
+                public User asignee;
+                public User author;
+                public string title, description, state, updated_at, created_at;
+
+                public enum StateEvent
+                {
+                    None, Close, Reopen
+                }
+
+                /// <summary>
+                /// Lists all Issues for a given project or the current user if _Project is null
+                /// </summary>
+                /// <param name="_Config">The configuration.</param>
+                /// <param name="_Project">The project.</param>
+                /// <returns></returns>
+                public static List<Issue> List(Config _Config, Project _Project = null)
+                {
+                    List<Issue> RetVal = new List<Issue>();
+
+                    try
+                    {
+                        int page = 1;
+                        List<Issue> issues = new List<Issue>();
+
+                        do
+                        {
+                            string URI = _Config.APIUrl;
+                            if (_Project != null)
+                                URI += "projects/" + _Project.id.ToString() + "/issues";
+                            else
+                                Uri += "/issues";
+
+                            URI += "?per_page=100"
+                                    + "&page=" + page.ToString());
+
+                            HttpResponse<string> R = Unirest.get(URI)
+                                    .header("accept", "application/json")
+                                    .header("PRIVATE-TOKEN", _Config.APIKey)
+                                    .asString();
+
+                            if (R.Code < 200 | R.Code >= 300)
+                            {
+                                throw new GitLabServerErrorException(R.Body, R.Code);
+                            }
+                            else
+                            {
+                                dynamic Result = JsonConvert.DeserializeObject(R.Body);
+                                if (Result is JArray)
+                                {
+                                    JArray ResultArray = (JArray)Result;
+                                    foreach (JToken Token in ResultArray)
+                                    {
+                                        Issue I = JsonConvert.DeserializeObject<Issue>(Token.ToString());
+                                        issues.Add(I);
+                                    }
+                                }
+                            }
+
+                            page++;
+                            RetVal.AddRange(issues);
+                            issues = new List<Issue>();
+                        }
+                        while (issues.Count > 0 & page < 100);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw ex;
+                    }
+                    return RetVal;
+                }
+
+                /// <summary>
+                /// Gets the specified Issue by numeric ID.
+                /// </summary>
+                /// <param name="_Config">The _ configuration.</param>
+                /// <param name="_Project">The _ project.</param>
+                /// <param name="_ID">The _ identifier.</param>
+                /// <returns></returns>
+                public static Issue Get(Config _Config, Project _Project, int _ID)
+                {
+                    string URI = _Config.APIUrl + "projects/" + _Project.id.ToString() + "/issues/" + _ID.ToString();
+
+                    HttpResponse<string> R = Unirest.get(URI)
+                                            .header("accept", "application/json")
+                                            .header("PRIVATE-TOKEN", _Config.APIKey)
+                                            .asString();
+
+                    if (R.Code < 200 | R.Code >= 300)
+                    {
+                        throw new GitLabServerErrorException(R.Body, R.Code);
+                    }
+                    else
+                    {
+                        return JsonConvert.DeserializeObject<Issue>(R.Body);
+                    }
+                }
+
+                public static Issue Add(Config _Config, Project _Project, Issue _Issue)
+                {
+                    string labels = null;
+                    bool first = true;
+
+                    if (_Issue.labels != null)
+                    {
+                        labels = "";
+
+                        foreach (string l in _Issue.labels)
+                        {
+                            if (!first)
+                                labels += ",";
+
+                            labels += l;
+                            first = false;
+                        }
+                    }
+
+                    string URI = _Config.APIUrl + "projects/" + _Project.id.ToString() + "/issues?"
+                        + "title=" + HttpUtility.UrlEncode(_Issue.title)
+                        + "&description=" + HttpUtility.UrlEncode(_Issue.description);
+
+                    if (_Issue.asignee != null)
+                        URI += "&assignee_id=" + _Issue.asignee.id;
+                    if (_Issue.milestone != null)
+                        URI += "&milestone_id=" + _Issue.milestone.id;
+                    if (_Issue.labels != null)
+                        URI += "&labels=" + HttpUtility.UrlEncode(labels);
+
+                    HttpResponse<string> R = Unirest.post(URI)
+                                            .header("accept", "application/json")
+                                            .header("PRIVATE-TOKEN", _Config.APIKey)
+                                            .asString();
+
+                    if (R.Code < 200 | R.Code >= 300)
+                    {
+                        throw new GitLabServerErrorException(R.Body, R.Code);
+                    }
+                    else
+                    {
+                        return JsonConvert.DeserializeObject<Issue>(R.Body);
+                    }
+                }
+
+
+                /// <summary>
+                /// Saves the specified Issue on the GitLab server
+                /// </summary>
+                /// <param name="_Config">The configuration.</param>
+                /// <param name="_Issue">The issue.</param>
+                /// <param name="_StateEvent"></param>
+                /// <returns></returns>
+                public static Issue Update(Config _Config, Issue _Issue, StateEvent _StateEvent = StateEvent.None)
+                {
+                    string labels = null;
+                    bool first = true;
+
+                    if (_Issue.labels != null)
+                    {
+                        labels = "";
+
+                        foreach (string l in _Issue.labels)
+                        {
+                            if (!first)
+                                labels += ",";
+
+                            labels += l;
+                            first = false;
+                        }
+                    }
+
+                    string URI = _Config.APIUrl + "projects/" + _Issue.project_id.ToString() + "/issues/" + _Issue.id.ToString()
+                        + "?title=" + HttpUtility.UrlEncode(_Issue.title)
+                        + "&description=" + HttpUtility.UrlEncode(_Issue.description);
+                    if (_Issue.asignee != null)
+                        URI += "&assignee_id=" + _Issue.asignee.id;
+                    if (_Issue.milestone != null)
+                        URI += "&milestone_id=" + _Issue.milestone.id;
+                    if (_Issue.labels != null)
+                        URI += "&labels=" + HttpUtility.UrlEncode(labels);
+                    if (_StateEvent != StateEvent.None)
+                        URI += "&state_event=" + HttpUtility.UrlEncode(_StateEvent.ToString().ToLowerInvariant());
+
+                    HttpResponse<string> R = Unirest.put(URI)
+                                            .header("accept", "application/json")
+                                            .header("PRIVATE-TOKEN", _Config.APIKey)
+                                            .asString();
+
+                    if (R.Code < 200 | R.Code >= 300)
+                    {
+                        throw new GitLabServerErrorException(R.Body, R.Code);
+                    }
+                    else
+                    {
+                        return JsonConvert.DeserializeObject<Issue>(R.Body);
+                    }
+                }
+
+
+            }
+        }
+    }
+}
