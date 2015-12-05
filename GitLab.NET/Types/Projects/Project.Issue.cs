@@ -212,6 +212,122 @@ namespace GitLabDotNet
                     }
                 }
 
+                public static List<Note> ListComments(Config _Config, Issue _Issue)
+                {
+                    List<Note> RetVal = new List<Note>();
+
+                    try
+                    {
+                        int page = 1;
+                        List<Note> notes = new List<Note>();
+
+                        do
+                        {
+                            string URI = _Config.APIUrl;
+                          
+                           URI += "projects/" + _Issue.project_id.ToString() + "/issues/" +_Issue.id.ToString() + "/notes";
+                          
+
+                            URI += "?per_page=100"
+                                    + "&page=" + page.ToString());
+
+                            HttpResponse<string> R = Unirest.get(URI)
+                                    .header("accept", "application/json")
+                                    .header("PRIVATE-TOKEN", _Config.APIKey)
+                                    .asString();
+
+                            if (R.Code < 200 | R.Code >= 300)
+                            {
+                                throw new GitLabServerErrorException(R.Body, R.Code);
+                            }
+                            else
+                            {
+                                dynamic Result = JsonConvert.DeserializeObject(R.Body);
+                                if (Result is JArray)
+                                {
+                                    JArray ResultArray = (JArray)Result;
+                                    foreach (JToken Token in ResultArray)
+                                    {
+                                        Note N = JsonConvert.DeserializeObject<Note>(Token.ToString());
+                                        notes.Add(N);
+                                    }
+                                }
+                            }
+
+                            page++;
+                            RetVal.AddRange(notes);
+                            notes = new List<Note>();
+                        }
+                        while (notes.Count > 0 & page < 100);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw ex;
+                    }
+                    return RetVal;
+
+                }
+
+                public static Note GetComment(Config _Config, Issue _Issue, int _ID)
+                {
+                    string URI = _Config.APIUrl + "projects/" + _Issue.project_id.ToString() + "/issues/" + _Issue.id.ToString() +"/notes/"+ _ID.ToString();
+
+                    HttpResponse<string> R = Unirest.get(URI)
+                                            .header("accept", "application/json")
+                                            .header("PRIVATE-TOKEN", _Config.APIKey)
+                                            .asString();
+
+                    if (R.Code < 200 | R.Code >= 300)
+                    {
+                        throw new GitLabServerErrorException(R.Body, R.Code);
+                    }
+                    else
+                    {
+                        return JsonConvert.DeserializeObject<Note>(R.Body);
+                    }
+                }
+
+                public static Note UpdateComment(Config _Config, Issue _Issue, Note _Note)
+                {
+                    string URI = _Config.APIUrl + "projects/" + _Issue.project_id.ToString() + "/issues/" + _Issue.id + "/notes/" + _Note.id
+                        + "?body=" + HttpUtility.UrlEncode(_Note.body);
+
+                   
+                    HttpResponse<string> R = Unirest.put(URI)
+                                            .header("accept", "application/json")
+                                            .header("PRIVATE-TOKEN", _Config.APIKey)
+                                            .asString();
+
+                    if (R.Code < 200 | R.Code >= 300)
+                    {
+                        throw new GitLabServerErrorException(R.Body, R.Code);
+                    }
+                    else
+                    {
+                        return JsonConvert.DeserializeObject<Note>(R.Body);
+                    }
+                }
+
+                public static Note AddComment(Config _Config, Issue _Issue, string _Body)
+                {
+                    string URI = _Config.APIUrl + "projects/" + _Issue.project_id.ToString() + "/issues/" + _Issue.id + "/notes?"
+                        + "body=" + HttpUtility.UrlEncode(_Body);
+
+
+                    HttpResponse<string> R = Unirest.post(URI)
+                                            .header("accept", "application/json")
+                                            .header("PRIVATE-TOKEN", _Config.APIKey)
+                                            .asString();
+
+                    if (R.Code < 200 | R.Code >= 300)
+                    {
+                        throw new GitLabServerErrorException(R.Body, R.Code);
+                    }
+                    else
+                    {
+                        return JsonConvert.DeserializeObject<Note>(R.Body);
+                    }
+                }
 
             }
         }

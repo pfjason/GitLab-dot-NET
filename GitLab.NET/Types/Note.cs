@@ -7,6 +7,11 @@
         /// </summary>
         public class Note
         {
+            public int id;
+            public string body, created_at;
+            public object attachment;
+            public User author;
+            public bool system, upvote, downvote;
         }
     }
 }
