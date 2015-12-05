@@ -37,7 +37,8 @@ namespace GitLabDotNet
 
                     try
                     {
-                        int page = 1;
+                        int page = 0
+                            ;
                         List<Issue> issues = new List<Issue>();
 
                         do
@@ -48,10 +49,10 @@ namespace GitLabDotNet
                             else if (_Project != null)
                                 URI += "/projects/" + _Project.id.ToString() + "/issues";
                             else
-                                Uri += "/issues";
+                                URI += "/issues";
 
                             URI += "?per_page=100"
-                                    + "&page=" + page.ToString());
+                                    + "&page=" + page.ToString();
 
                             HttpResponse<string> R = Unirest.get(URI)
                                     .header("accept", "application/json")
@@ -237,7 +238,7 @@ namespace GitLabDotNet
 
 
                             URI += "?per_page=100"
-                                    + "&page=" + page.ToString());
+                                    + "&page=" + page.ToString();
 
                             HttpResponse<string> R = Unirest.get(URI)
                                     .header("accept", "application/json")

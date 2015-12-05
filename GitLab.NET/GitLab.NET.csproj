@@ -97,6 +97,7 @@
   <ItemGroup>
     <Compile Include="Config.cs" />
     <Compile Include="Types\Projects\Project.Branch.cs" />
+    <Compile Include="Types\Projects\Project.Issue.cs" />
     <Compile Include="Types\Repositories\Repository.Commit.cs" />
     <Compile Include="Types\DeployKey.cs" />
     <Compile Include="Types\Repositories\Repository.File.cs" />
@@ -104,7 +105,6 @@
     <Compile Include="Types\Groups\Group.cs" />
     <Compile Include="Types\Groups\Group.Members.cs" />
     <Compile Include="Types\Groups\Group.StaticMethods.cs" />
-    <Compile Include="Types\Issue.cs" />
     <Compile Include="Types\Projects\Project.Webhook.cs" />
     <Compile Include="Types\Repositories\Repository.Diff.cs" />
     <Compile Include="Types\Users\User.Email.StaticFunctions.cs" />
