@@ -60,8 +60,8 @@ namespace GitLabDotNet
                                     JArray ResultArray = (JArray)Result;
                                     foreach (JToken Token in ResultArray)
                                     {
-                                        Snippet S = JsonConvert.DeserializeObject<Snippet>(Token.ToString());
-                                        milestones.Add(S);
+                                        Milestone M = JsonConvert.DeserializeObject<Milestone>(Token.ToString());
+                                        milestones.Add(M);
                                     }
                                 }
                             }
@@ -219,7 +219,7 @@ namespace GitLabDotNet
 
 
                             URI += "?per_page=100"
-                                    + "&page=" + page.ToString());
+                                    + "&page=" + page.ToString();
 
                             HttpResponse<string> R = Unirest.get(URI)
                                     .header("accept", "application/json")

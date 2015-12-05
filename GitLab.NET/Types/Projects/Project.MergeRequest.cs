@@ -356,7 +356,7 @@ namespace GitLabDotNet
 
 
                             URI += "?per_page=100"
-                                    + "&page=" + page.ToString());
+                                    + "&page=" + page.ToString();
 
                             HttpResponse<string> R = Unirest.get(URI)
                                     .header("accept", "application/json")
