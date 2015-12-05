@@ -212,6 +212,12 @@ namespace GitLabDotNet
                     }
                 }
 
+                /// <summary>
+                /// Lists the comments.
+                /// </summary>
+                /// <param name="_Config">The _ configuration.</param>
+                /// <param name="_Issue">The _ issue.</param>
+                /// <returns></returns>
                 public static List<Note> ListComments(Config _Config, Issue _Issue)
                 {
                     List<Note> RetVal = new List<Note>();
@@ -224,9 +230,9 @@ namespace GitLabDotNet
                         do
                         {
                             string URI = _Config.APIUrl;
-                          
-                           URI += "projects/" + _Issue.project_id.ToString() + "/issues/" +_Issue.id.ToString() + "/notes";
-                          
+
+                            URI += "projects/" + _Issue.project_id.ToString() + "/issues/" + _Issue.id.ToString() + "/notes";
+
 
                             URI += "?per_page=100"
                                     + "&page=" + page.ToString());
@@ -268,9 +274,16 @@ namespace GitLabDotNet
 
                 }
 
+                /// <summary>
+                /// Gets a comment by ID.
+                /// </summary>
+                /// <param name="_Config">The _ configuration.</param>
+                /// <param name="_Issue">The _ issue.</param>
+                /// <param name="_ID">The _ identifier.</param>
+                /// <returns></returns>
                 public static Note GetComment(Config _Config, Issue _Issue, int _ID)
                 {
-                    string URI = _Config.APIUrl + "projects/" + _Issue.project_id.ToString() + "/issues/" + _Issue.id.ToString() +"/notes/"+ _ID.ToString();
+                    string URI = _Config.APIUrl + "projects/" + _Issue.project_id.ToString() + "/issues/" + _Issue.id.ToString() + "/notes/" + _ID.ToString();
 
                     HttpResponse<string> R = Unirest.get(URI)
                                             .header("accept", "application/json")
@@ -287,12 +300,19 @@ namespace GitLabDotNet
                     }
                 }
 
+                /// <summary>
+                /// Updates a comment.
+                /// </summary>
+                /// <param name="_Config">The _ configuration.</param>
+                /// <param name="_Issue">The _ issue.</param>
+                /// <param name="_Note">The _ note.</param>
+                /// <returns></returns>
                 public static Note UpdateComment(Config _Config, Issue _Issue, Note _Note)
                 {
                     string URI = _Config.APIUrl + "projects/" + _Issue.project_id.ToString() + "/issues/" + _Issue.id + "/notes/" + _Note.id
                         + "?body=" + HttpUtility.UrlEncode(_Note.body);
 
-                   
+
                     HttpResponse<string> R = Unirest.put(URI)
                                             .header("accept", "application/json")
                                             .header("PRIVATE-TOKEN", _Config.APIKey)
@@ -308,6 +328,13 @@ namespace GitLabDotNet
                     }
                 }
 
+                /// <summary>
+                /// Adds a comment.
+                /// </summary>
+                /// <param name="_Config">The _ configuration.</param>
+                /// <param name="_Issue">The _ issue.</param>
+                /// <param name="_Body">The _ body.</param>
+                /// <returns></returns>
                 public static Note AddComment(Config _Config, Issue _Issue, string _Body)
                 {
                     string URI = _Config.APIUrl + "projects/" + _Issue.project_id.ToString() + "/issues/" + _Issue.id + "/notes?"

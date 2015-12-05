@@ -331,6 +331,151 @@ namespace GitLabDotNet
                     }
                     return RetVal;
                 }
+
+
+                /// <summary>
+                /// Lists the comments.
+                /// </summary>
+                /// <param name="_Config">The _ configuration.</param>
+                /// <param name="_MergeRequest"></param>
+                /// <returns></returns>
+                public static List<Note> ListComments(Config _Config, MergeRequest _MergeRequest)
+                {
+                    List<Note> RetVal = new List<Note>();
+
+                    try
+                    {
+                        int page = 1;
+                        List<Note> notes = new List<Note>();
+
+                        do
+                        {
+                            string URI = _Config.APIUrl;
+
+                            URI += "projects/" + _MergeRequest.project_id.ToString() + "/merge_request/" + _MergeRequest.id.ToString() + "/notes";
+
+
+                            URI += "?per_page=100"
+                                    + "&page=" + page.ToString());
+
+                            HttpResponse<string> R = Unirest.get(URI)
+                                    .header("accept", "application/json")
+                                    .header("PRIVATE-TOKEN", _Config.APIKey)
+                                    .asString();
+
+                            if (R.Code < 200 | R.Code >= 300)
+                            {
+                                throw new GitLabServerErrorException(R.Body, R.Code);
+                            }
+                            else
+                            {
+                                dynamic Result = JsonConvert.DeserializeObject(R.Body);
+                                if (Result is JArray)
+                                {
+                                    JArray ResultArray = (JArray)Result;
+                                    foreach (JToken Token in ResultArray)
+                                    {
+                                        Note N = JsonConvert.DeserializeObject<Note>(Token.ToString());
+                                        notes.Add(N);
+                                    }
+                                }
+                            }
+
+                            page++;
+                            RetVal.AddRange(notes);
+                            notes = new List<Note>();
+                        }
+                        while (notes.Count > 0 & page < 100);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw ex;
+                    }
+                    return RetVal;
+
+                }
+
+                /// <summary>
+                /// Gets a comment by numeric ID.
+                /// </summary>
+                /// <param name="_Config">The _ configuration.</param>
+                /// <param name="_MergeRequest">The _ merge request.</param>
+                /// <param name="_ID">The _ identifier.</param>
+                /// <returns></returns>
+                public static Note GetComment(Config _Config, MergeRequest _MergeRequest, int _ID)
+                {
+                    string URI = _Config.APIUrl + "projects/" + _MergeRequest.project_id.ToString() + "/merge_request/" + _MergeRequest.id.ToString() + "/notes/" + _ID.ToString();
+
+                    HttpResponse<string> R = Unirest.get(URI)
+                                            .header("accept", "application/json")
+                                            .header("PRIVATE-TOKEN", _Config.APIKey)
+                                            .asString();
+
+                    if (R.Code < 200 | R.Code >= 300)
+                    {
+                        throw new GitLabServerErrorException(R.Body, R.Code);
+                    }
+                    else
+                    {
+                        return JsonConvert.DeserializeObject<Note>(R.Body);
+                    }
+                }
+
+                /// <summary>
+                /// Updates a comment.
+                /// </summary>
+                /// <param name="_Config">The _ configuration.</param>
+                /// <param name="_MergeRequest">The _ merge request.</param>
+                /// <param name="_Note">The _ note.</param>
+                /// <returns></returns>
+                public static Note UpdateComment(Config _Config, MergeRequest _MergeRequest, Note _Note)
+                {
+                    string URI = _Config.APIUrl + "projects/" + _MergeRequest.project_id.ToString() + "/merge_request/" + _MergeRequest.id + "/notes/" + _Note.id
+                        + "?body=" + HttpUtility.UrlEncode(_Note.body);
+
+
+                    HttpResponse<string> R = Unirest.put(URI)
+                                            .header("accept", "application/json")
+                                            .header("PRIVATE-TOKEN", _Config.APIKey)
+                                            .asString();
+
+                    if (R.Code < 200 | R.Code >= 300)
+                    {
+                        throw new GitLabServerErrorException(R.Body, R.Code);
+                    }
+                    else
+                    {
+                        return JsonConvert.DeserializeObject<Note>(R.Body);
+                    }
+                }
+
+                /// <summary>
+                /// Adds a comment.
+                /// </summary>
+                /// <param name="_Config">The _ configuration.</param>
+                /// <param name="_MergeRequest">The _ merge request.</param>
+                /// <param name="_Body">The _ body.</param>
+                /// <returns></returns>
+                public static Note AddComment(Config _Config, MergeRequest _MergeRequest, string _Body)
+                {
+                    string URI = _Config.APIUrl + "projects/" + _MergeRequest.project_id.ToString() + "/merge_request/" + _MergeRequest.id + "/notes?"
+                        + "body=" + HttpUtility.UrlEncode(_Body);
+
+
+                    HttpResponse<string> R = Unirest.post(URI)
+                                            .header("accept", "application/json")
+                                            .header("PRIVATE-TOKEN", _Config.APIKey)
+                                            .asString();
+
+                    if (R.Code < 200 | R.Code >= 300)
+                    {
+                        throw new GitLabServerErrorException(R.Body, R.Code);
+                    }
+                    else
+                    {
+                        return JsonConvert.DeserializeObject<Note>(R.Body);
+                    }
+                }
             }
 
             class MergeRequestList: List<MergeRequest>
