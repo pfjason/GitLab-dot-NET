@@ -31,7 +31,7 @@ namespace GitLabDotNet
                 /// <param name="_Config">The configuration.</param>
                 /// <param name="_Project">The project.</param>
                 /// <returns></returns>
-                public static List<Issue> List(Config _Config, Project _Project = null)
+                public static List<Issue> List(Config _Config, Project _Project = null, Milestone _Milestone = null)
                 {
                     List<Issue> RetVal = new List<Issue>();
 
@@ -43,8 +43,10 @@ namespace GitLabDotNet
                         do
                         {
                             string URI = _Config.APIUrl;
-                            if (_Project != null)
-                                URI += "projects/" + _Project.id.ToString() + "/issues";
+                            if(_Milestone != null)
+                                URI += "/projects/" + _Milestone.project_id.ToString() + "/milestones/" +_Milestone.id+ "/issues";
+                            else if (_Project != null)
+                                URI += "/projects/" + _Project.id.ToString() + "/issues";
                             else
                                 Uri += "/issues";
 

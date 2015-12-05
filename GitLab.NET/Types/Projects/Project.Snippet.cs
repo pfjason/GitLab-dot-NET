@@ -12,7 +12,7 @@ namespace GitLabDotNet
     {
         public partial class Project
         {
-            class Snippet
+            public class Snippet
             {
                 public int id;
                 public string title, file_name, expires_at, updated_at, created_at;
