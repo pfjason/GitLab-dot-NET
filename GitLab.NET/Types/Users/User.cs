@@ -18,7 +18,7 @@ namespace GitLabDotNet
 
         public void RefreshUsers()
         {
-            _Users = User.List(CurrentConfig);
+            _Users = User.List(CurrentConfig, this);
         }
 
         private User _CurrentUser;

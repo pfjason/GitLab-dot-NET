@@ -226,7 +226,7 @@ namespace GitLabDotNet
             /// <param name="_AccessLevel"></param>
             public static void AddMember(Config _Config, Group _Group, User _User, Member.AccessLevel _AccessLevel)
             {
-                string URI = _Config.APIUrl + "groups/" + _Group.id.ToString() + "/members/?user_id=" + _User.id + "?access_level=" + Convert.ToInt64(_AccessLevel);
+                string URI = _Config.APIUrl + "groups/" + _Group.id.ToString() + "/members/?user_id=" + _User.id + "&access_level=" + Convert.ToInt64(_AccessLevel);
 
                 HttpResponse<string> R = Unirest.post(URI)
                                         .header("accept", "application/json")

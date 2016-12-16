@@ -16,7 +16,7 @@ namespace GitLabDotNet
             /// </summary>
             /// <param name="_Config">A GitLab.NET Configuration object</param>
             /// <returns></returns>
-            public static List<User> List(Config _Config)
+            public static List<User> List(Config _Config, GitLab _Parent = null)
             {
                 List<User> RetVal = new List<User>();
 
@@ -49,6 +49,7 @@ namespace GitLabDotNet
                                 foreach (JToken Token in ResultArray)
                                 {
                                     User U = JsonConvert.DeserializeObject<User>(Token.ToString());
+                                    U.SetParent(_Parent);                               
                                     users.Add(U);
                                 }
                             }
