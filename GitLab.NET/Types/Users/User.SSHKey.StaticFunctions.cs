@@ -29,6 +29,8 @@ namespace GitLabDotNet
 
                     do
                     {
+                        keys.Clear();
+
                         string URI = _Config.APIUrl;
 
                         if (_User == null)
@@ -43,7 +45,7 @@ namespace GitLabDotNet
                                 .header("PRIVATE-TOKEN", _Config.APIKey)
                                 .asString();
 
-                        if (R.Code < 200 | R.Code >= 300)
+                        if (R.Code < 200 || R.Code >= 300)
                         {
                             throw new GitLabServerErrorException(R.Body, R.Code);
                         }
@@ -62,7 +64,6 @@ namespace GitLabDotNet
                         }
                         page++;
                         RetVal.AddRange(keys);
-                        keys = new List<SSHKey>();
                     }
                     while (keys.Count > 0 & page < 100);
                 }
@@ -99,7 +100,7 @@ namespace GitLabDotNet
                                 .header("PRIVATE-TOKEN", _Config.APIKey)
                                 .asString();
 
-                    if (R.Code < 200 | R.Code >= 300)
+                    if (R.Code < 200 || R.Code >= 300)
                     {
                         throw new GitLabServerErrorException(R.Body, R.Code);
                     }
@@ -140,7 +141,7 @@ namespace GitLabDotNet
                                 .header("PRIVATE-TOKEN", _Config.APIKey)
                                 .asString();
 
-                    if (R.Code < 200 | R.Code >= 300)
+                    if (R.Code < 200 || R.Code >= 300)
                     {
                         throw new GitLabServerErrorException(R.Body, R.Code);
                     }
@@ -173,7 +174,7 @@ namespace GitLabDotNet
                                 .header("PRIVATE-TOKEN", _Config.APIKey)
                                 .asString();
 
-                    if (R.Code < 200 | R.Code >= 300)
+                    if (R.Code < 200 || R.Code >= 300)
                     {
                         throw new GitLabServerErrorException(R.Body, R.Code);
                     }

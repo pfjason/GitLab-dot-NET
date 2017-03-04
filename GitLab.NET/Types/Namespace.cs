@@ -38,6 +38,7 @@ namespace GitLabDotNet
 
                     do
                     {
+                        namespaces.Clear();
 
                         string URI = _Config.APIUrl + "/namespaces?per_page=100"
                                 + "&page=" + page.ToString();
@@ -50,20 +51,19 @@ namespace GitLabDotNet
                                 .header("PRIVATE-TOKEN", _Config.APIKey)
                                 .asString();
 
-                        if (R.Code < 200 | R.Code >= 300)
+                        if (R.Code < 200 || R.Code >= 300)
                         {
                             throw new GitLabServerErrorException(R.Body, R.Code);
                         }
 
                         namespaces = JsonConvert.DeserializeObject<List<Namespace>>(R.Body);
 
-
                         foreach (Namespace NS in namespaces)
                         {
                             if ((Me.username.ToUpperInvariant() == NS.path.ToUpperInvariant()
                                     && NS.kind.ToUpperInvariant() == "USER")
-                                    | NS.kind.ToUpperInvariant() == "GROUP"
-                                    | !_OnlyOwned
+                                    || NS.kind.ToUpperInvariant() == "GROUP"
+                                    || !_OnlyOwned
                                     )
                             {
                                 RetVal.Add(NS);
@@ -72,7 +72,6 @@ namespace GitLabDotNet
 
                         page++;
                         RetVal.AddRange(namespaces);
-                        namespaces = new List<Namespace>();
                     }
                     while (namespaces.Count > 0 & page < 100);
                 }

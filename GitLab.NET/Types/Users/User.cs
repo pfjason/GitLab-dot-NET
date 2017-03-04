@@ -78,6 +78,7 @@ namespace GitLabDotNet
                 , skype
                 , linkedin
                 , twitter
+                , web_url
                 , website_url
                 , extern_uid
                 , provider

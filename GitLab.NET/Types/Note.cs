@@ -7,8 +7,8 @@
         /// </summary>
         public class Note
         {
-            public int id;
-            public string body, created_at;
+            public int id, noteable_id;
+            public string body, created_at, noteable_type;
             public object attachment;
             public User author;
             public bool system, upvote, downvote;

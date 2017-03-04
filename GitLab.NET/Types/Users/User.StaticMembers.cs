@@ -27,6 +27,8 @@ namespace GitLabDotNet
 
                     do
                     {
+                        users.Clear();
+
                         string URI = _Config.APIUrl + "users?per_page=100" + "&page=" + page.ToString();
 
                         HttpResponse<string> R = Unirest.get(URI)
@@ -34,7 +36,7 @@ namespace GitLabDotNet
                                 .header("PRIVATE-TOKEN", _Config.APIKey)
                                 .asString();
 
-                        if (R.Code < 200 | R.Code >= 300)
+                        if (R.Code < 200 || R.Code >= 300)
                         {
                             throw new GitLabServerErrorException(R.Body, R.Code);
                         }
@@ -53,7 +55,6 @@ namespace GitLabDotNet
                         }
                         page++;
                         RetVal.AddRange(users);
-                        users = new List<User>();
                     }
                     while (users.Count > 0 & page < 100);
                 }
@@ -89,7 +90,7 @@ namespace GitLabDotNet
                                 .header("PRIVATE-TOKEN", _Config.APIKey)
                                 .asString();
 
-                    if (R.Code < 200 | R.Code >= 300)
+                    if (R.Code < 200 || R.Code >= 300)
                     {
                         throw new GitLabServerErrorException(R.Body, R.Code);
                     }
@@ -127,6 +128,8 @@ namespace GitLabDotNet
                     URI += "&linkedin=" + HttpUtility.UrlEncode(_User.linkedin);
                 if (!String.IsNullOrWhiteSpace(_User.twitter))
                     URI += "&twitter=" + HttpUtility.UrlEncode(_User.twitter);
+                if (!String.IsNullOrWhiteSpace(_User.web_url))
+                    URI += "&web_url=" + HttpUtility.UrlEncode(_User.web_url);
                 if (!String.IsNullOrWhiteSpace(_User.website_url))
                     URI += "&website_url=" + HttpUtility.UrlEncode(_User.website_url);
                 if (_User.projects_limit >= 0)
@@ -143,7 +146,7 @@ namespace GitLabDotNet
                                         .header("PRIVATE-TOKEN", _Config.APIKey)
                                         .asString();
 
-                if (R.Code < 200 | R.Code >= 300)
+                if (R.Code < 200 || R.Code >= 300)
                 {
                     throw new GitLabServerErrorException(R.Body, R.Code);
                 }               
@@ -177,6 +180,8 @@ namespace GitLabDotNet
                     URI += "&linkedin=" + HttpUtility.UrlEncode(_User.linkedin);
                 if (!String.IsNullOrWhiteSpace(_User.twitter))
                     URI += "&twitter=" + HttpUtility.UrlEncode(_User.twitter);
+                if (!String.IsNullOrWhiteSpace(_User.web_url))
+                    URI += "&web_url=" + HttpUtility.UrlEncode(_User.web_url);
                 if (!String.IsNullOrWhiteSpace(_User.website_url))
                     URI += "&website_url=" + HttpUtility.UrlEncode(_User.website_url);
                 if (_User.projects_limit >= 0)
@@ -196,7 +201,7 @@ namespace GitLabDotNet
                                         .header("PRIVATE-TOKEN", _Config.APIKey)
                                         .asString();
 
-                if (R.Code < 200 | R.Code >= 300)
+                if (R.Code < 200 || R.Code >= 300)
                 {
                     throw new GitLabServerErrorException(R.Body, R.Code);
                 }
@@ -219,7 +224,7 @@ namespace GitLabDotNet
                                 .header("PRIVATE-TOKEN", _Config.APIKey)
                                 .asString();
 
-                    if (R.Code < 200 | R.Code >= 300)
+                    if (R.Code < 200 || R.Code >= 300)
                     {
                         throw new GitLabServerErrorException(R.Body, R.Code);
                     }                    
@@ -246,7 +251,7 @@ namespace GitLabDotNet
                                 .header("PRIVATE-TOKEN", _Config.APIKey)
                                 .asString();
 
-                    if (R.Code < 200 | R.Code >= 300)
+                    if (R.Code < 200 || R.Code >= 300)
                     {
                         throw new GitLabServerErrorException(R.Body, R.Code);
                     }
@@ -268,7 +273,7 @@ namespace GitLabDotNet
                                 .header("PRIVATE-TOKEN", _Config.APIKey)
                                 .asString();
 
-                    if (R.Code < 200 | R.Code >= 300)
+                    if (R.Code < 200 || R.Code >= 300)
                     {
                         throw new GitLabServerErrorException(R.Body, R.Code);
                     }

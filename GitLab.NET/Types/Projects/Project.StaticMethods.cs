@@ -30,7 +30,7 @@ namespace GitLabDotNet
                                         .header("PRIVATE-TOKEN", _Config.APIKey)
                                         .asString();
 
-                if (R.Code < 200 | R.Code >= 300)
+                if (R.Code < 200 || R.Code >= 300)
                 {
                     throw new GitLabServerErrorException(R.Body, R.Code);
                 }
@@ -65,7 +65,7 @@ namespace GitLabDotNet
                                         .header("PRIVATE-TOKEN", _Config.APIKey)
                                         .asString();
 
-                if (R.Code < 200 | R.Code >= 300)
+                if (R.Code < 200 || R.Code >= 300)
                 {
                     throw new GitLabServerErrorException(R.Body + " / " + URI, R.Code);
                 }
@@ -86,7 +86,7 @@ namespace GitLabDotNet
                                         .header("PRIVATE-TOKEN", _Config.APIKey)
                                         .asString();
 
-                if (R.Code < 200 | R.Code >= 300)
+                if (R.Code < 200 || R.Code >= 300)
                 {
                     throw new GitLabServerErrorException(R.Body, R.Code);
                 }
@@ -108,6 +108,8 @@ namespace GitLabDotNet
 
                     do
                     {
+                        projects.Clear();
+
                         HttpResponse<string> R = Unirest.get
                                 (_Config.APIUrl + "projects?per_page=100"
                                 + "&page=" + page.ToString())
@@ -115,7 +117,7 @@ namespace GitLabDotNet
                                 .header("PRIVATE-TOKEN", _Config.APIKey)
                                 .asString();
 
-                        if (R.Code < 200 | R.Code >= 300)
+                        if (R.Code < 200 || R.Code >= 300)
                         {
                             throw new GitLabServerErrorException(R.Body, R.Code);
                         }
@@ -135,7 +137,6 @@ namespace GitLabDotNet
                         }
                         page++;
                         RetVal.AddRange(projects);
-                        projects = new List<Project>();
                     }
                     while (projects.Count > 0 & page < 100);
                 }
@@ -165,7 +166,7 @@ namespace GitLabDotNet
                                 .header("PRIVATE-TOKEN", _Config.APIKey)
                                 .asString();
 
-                    if (R.Code < 200 | R.Code >= 300)
+                    if (R.Code < 200 || R.Code >= 300)
                     {
                         throw new GitLabServerErrorException(R.Body, R.Code);
                     }
@@ -199,6 +200,8 @@ namespace GitLabDotNet
 
                     do
                     {
+                        projects.Clear();
+
                         HttpResponse<string> R = Unirest.get
                                 (_Config.APIUrl + "projects/search/" + HttpUtility.UrlEncode(Query)
                                 + "?per_page=100"
@@ -207,7 +210,7 @@ namespace GitLabDotNet
                                 .header("PRIVATE-TOKEN", _Config.APIKey)
                                 .asString();
 
-                        if (R.Code < 200 | R.Code >= 300)
+                        if (R.Code < 200 || R.Code >= 300)
                         {
                             throw new GitLabServerErrorException(R.Body, R.Code);
                         }
@@ -226,7 +229,6 @@ namespace GitLabDotNet
                         }
                         page++;
                         RetVal.AddRange(projects);
-                        projects = new List<Project>();
                     }
                     while (projects.Count > 0 & page < 100);
                 }
@@ -254,6 +256,8 @@ namespace GitLabDotNet
 
                     do
                     {
+                        members.Clear();
+
                         string URI = (_Config.APIUrl + "projects/" + _Project.id.ToString() + "/members"
                                 + "?per_page=100"
                                 + "&page=" + page.ToString());
@@ -264,7 +268,7 @@ namespace GitLabDotNet
                                 .header("PRIVATE-TOKEN", _Config.APIKey)
                                 .asString();
 
-                        if (R.Code < 200 | R.Code >= 300)
+                        if (R.Code < 200 || R.Code >= 300)
                         {
                             throw new GitLabServerErrorException(R.Body, R.Code);
                         }
@@ -283,7 +287,6 @@ namespace GitLabDotNet
                         }
                         page++;
                         RetVal.AddRange(members);
-                        members = new List<Member>();
                     }
                     while (members.Count > 0 & page < 100);
                 }
@@ -310,7 +313,7 @@ namespace GitLabDotNet
                                         .header("PRIVATE-TOKEN", _Config.APIKey)
                                         .asString();
 
-                if (R.Code < 200 | R.Code >= 300)
+                if (R.Code < 200 || R.Code >= 300)
                 {
                     throw new GitLabServerErrorException(R.Body, R.Code);
                 }
@@ -332,7 +335,7 @@ namespace GitLabDotNet
                                         .header("PRIVATE-TOKEN", _Config.APIKey)
                                         .asString();
 
-                if (R.Code < 200 | R.Code >= 300)
+                if (R.Code < 200 || R.Code >= 300)
                 {
                     throw new GitLabServerErrorException(R.Body, R.Code);
                 }
@@ -353,7 +356,7 @@ namespace GitLabDotNet
                                         .header("PRIVATE-TOKEN", _Config.APIKey)
                                         .asString();
 
-                if (R.Code < 200 | R.Code >= 300)
+                if (R.Code < 200 || R.Code >= 300)
                 {
                     throw new GitLabServerErrorException(R.Body, R.Code);
                 }

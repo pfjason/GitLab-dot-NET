@@ -59,7 +59,7 @@ namespace GitLabDotNet
                             .header("PRIVATE-TOKEN", C.APIKey)
                             .asString();
 
-                if (R.Code < 200 | R.Code >= 300)
+                if (R.Code < 200 || R.Code >= 300)
                 {
                     throw new GitLabServerErrorException(R.Body, R.Code);
                 }

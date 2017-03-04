@@ -11,7 +11,7 @@ namespace GitLabDotNet
     {
         public partial class Project
         {
-            class MergeRequest
+            public class MergeRequest
             {
 
                 private Project Parent;               
@@ -61,6 +61,7 @@ namespace GitLabDotNet
                 public User author;
                 public User assignee;
                 public bool work_in_progress;
+                public int user_notes_count;
 
                 public enum StateEvent
                 {
@@ -84,6 +85,8 @@ namespace GitLabDotNet
 
                         do
                         {
+                            mergerequests.Clear();
+
                             string URI = _Config.APIUrl + "projects/" + _Project.id + "/merge_requests";
                             URI += "?per_page=100" + "&page=" + page.ToString();
 
@@ -92,7 +95,7 @@ namespace GitLabDotNet
                                     .header("PRIVATE-TOKEN", _Config.APIKey)
                                     .asString();
 
-                            if (R.Code < 200 | R.Code >= 300)
+                            if (R.Code < 200 || R.Code >= 300)
                             {
                                 throw new GitLabServerErrorException(R.Body, R.Code);
                             }
@@ -112,7 +115,6 @@ namespace GitLabDotNet
                             }
                             page++;
                             RetVal.AddRange(mergerequests);
-                            mergerequests = new List<MergeRequest>();
                         }
                         while (mergerequests.Count > 0 & page < 100);
                     }
@@ -136,7 +138,7 @@ namespace GitLabDotNet
                     MergeRequest RetVal;
                     try
                     {
-                        string URI = _Config.APIUrl + "/projects/" + _Project.id + "/merge_request/" + _ID.ToString();
+                        string URI = _Config.APIUrl + "/projects/" + _Project.id + "/merge_requests/" + _ID.ToString();
 
                         if (_WithChanges)
                             URI += "/changes";
@@ -146,7 +148,7 @@ namespace GitLabDotNet
                                     .header("PRIVATE-TOKEN", _Config.APIKey)
                                     .asString();
 
-                        if (R.Code < 200 | R.Code >= 300)
+                        if (R.Code < 200 || R.Code >= 300)
                         {
                             throw new GitLabServerErrorException(R.Body, R.Code);
                         }
@@ -212,7 +214,7 @@ namespace GitLabDotNet
                                     .header("PRIVATE-TOKEN", _Config.APIKey)
                                     .asString();
 
-                        if (R.Code < 200 | R.Code >= 300)
+                        if (R.Code < 200 || R.Code >= 300)
                         {
                             throw new GitLabServerErrorException(R.Body, R.Code);
                         }
@@ -257,7 +259,7 @@ namespace GitLabDotNet
                             first = false;
                         }
 
-                        string URI = _Config.APIUrl + "/projects/" + _MergeRequest.project_id + "/merge_request/" + _MergeRequest.id + "?";
+                        string URI = _Config.APIUrl + "/projects/" + _MergeRequest.project_id + "/merge_requests/" + _MergeRequest.id + "?";
 
                         if (_TargetBranch != null)
                             URI += "&target_branch=" + HttpUtility.UrlEncode(_TargetBranch);
@@ -277,7 +279,7 @@ namespace GitLabDotNet
                                     .header("PRIVATE-TOKEN", _Config.APIKey)
                                     .asString();
 
-                        if (R.Code < 200 | R.Code >= 300)
+                        if (R.Code < 200 || R.Code >= 300)
                         {
                             throw new GitLabServerErrorException(R.Body, R.Code);
                         }
@@ -306,7 +308,7 @@ namespace GitLabDotNet
                     MergeRequest RetVal;
                     try
                     {
-                        string URI = _Config.APIUrl + "/projects/" + _MergeRequest.project_id + "/merge_request/" + _MergeRequest.id + "/merge?";
+                        string URI = _Config.APIUrl + "/projects/" + _MergeRequest.project_id + "/merge_requests/" + _MergeRequest.id + "/merge?";
 
                         if (_CommitMessage != null)
                             URI += "&merge_commit_message=" + HttpUtility.UrlEncode(_CommitMessage);                       
@@ -316,7 +318,7 @@ namespace GitLabDotNet
                                     .header("PRIVATE-TOKEN", _Config.APIKey)
                                     .asString();
 
-                        if (R.Code < 200 | R.Code >= 300)
+                        if (R.Code < 200 || R.Code >= 300)
                         {
                             throw new GitLabServerErrorException(R.Body, R.Code);
                         }
@@ -350,9 +352,11 @@ namespace GitLabDotNet
 
                         do
                         {
+                            notes.Clear();
+
                             string URI = _Config.APIUrl;
 
-                            URI += "projects/" + _MergeRequest.project_id.ToString() + "/merge_request/" + _MergeRequest.id.ToString() + "/notes";
+                            URI += "projects/" + _MergeRequest.project_id.ToString() + "/merge_requests/" + _MergeRequest.id.ToString() + "/notes";
 
 
                             URI += "?per_page=100"
@@ -363,7 +367,7 @@ namespace GitLabDotNet
                                     .header("PRIVATE-TOKEN", _Config.APIKey)
                                     .asString();
 
-                            if (R.Code < 200 | R.Code >= 300)
+                            if (R.Code < 200 || R.Code >= 300)
                             {
                                 throw new GitLabServerErrorException(R.Body, R.Code);
                             }
@@ -383,7 +387,6 @@ namespace GitLabDotNet
 
                             page++;
                             RetVal.AddRange(notes);
-                            notes = new List<Note>();
                         }
                         while (notes.Count > 0 & page < 100);
                     }
@@ -404,14 +407,14 @@ namespace GitLabDotNet
                 /// <returns></returns>
                 public static Note GetComment(Config _Config, MergeRequest _MergeRequest, int _ID)
                 {
-                    string URI = _Config.APIUrl + "projects/" + _MergeRequest.project_id.ToString() + "/merge_request/" + _MergeRequest.id.ToString() + "/notes/" + _ID.ToString();
+                    string URI = _Config.APIUrl + "projects/" + _MergeRequest.project_id.ToString() + "/merge_requests/" + _MergeRequest.id.ToString() + "/notes/" + _ID.ToString();
 
                     HttpResponse<string> R = Unirest.get(URI)
-                                            .header("accept", "application/json")
-                                            .header("PRIVATE-TOKEN", _Config.APIKey)
-                                            .asString();
+                                    .header("accept", "application/json")
+                                    .header("PRIVATE-TOKEN", _Config.APIKey)
+                                    .asString();
 
-                    if (R.Code < 200 | R.Code >= 300)
+                    if (R.Code < 200 || R.Code >= 300)
                     {
                         throw new GitLabServerErrorException(R.Body, R.Code);
                     }
@@ -430,7 +433,7 @@ namespace GitLabDotNet
                 /// <returns></returns>
                 public static Note UpdateComment(Config _Config, MergeRequest _MergeRequest, Note _Note)
                 {
-                    string URI = _Config.APIUrl + "projects/" + _MergeRequest.project_id.ToString() + "/merge_request/" + _MergeRequest.id + "/notes/" + _Note.id
+                    string URI = _Config.APIUrl + "projects/" + _MergeRequest.project_id.ToString() + "/merge_requests/" + _MergeRequest.id + "/notes/" + _Note.id
                         + "?body=" + HttpUtility.UrlEncode(_Note.body);
 
 
@@ -439,7 +442,7 @@ namespace GitLabDotNet
                                             .header("PRIVATE-TOKEN", _Config.APIKey)
                                             .asString();
 
-                    if (R.Code < 200 | R.Code >= 300)
+                    if (R.Code < 200 || R.Code >= 300)
                     {
                         throw new GitLabServerErrorException(R.Body, R.Code);
                     }
@@ -458,7 +461,7 @@ namespace GitLabDotNet
                 /// <returns></returns>
                 public static Note AddComment(Config _Config, MergeRequest _MergeRequest, string _Body)
                 {
-                    string URI = _Config.APIUrl + "projects/" + _MergeRequest.project_id.ToString() + "/merge_request/" + _MergeRequest.id + "/notes?"
+                    string URI = _Config.APIUrl + "projects/" + _MergeRequest.project_id.ToString() + "/merge_requests/" + _MergeRequest.id + "/notes?"
                         + "body=" + HttpUtility.UrlEncode(_Body);
 
 
@@ -467,7 +470,7 @@ namespace GitLabDotNet
                                             .header("PRIVATE-TOKEN", _Config.APIKey)
                                             .asString();
 
-                    if (R.Code < 200 | R.Code >= 300)
+                    if (R.Code < 200 || R.Code >= 300)
                     {
                         throw new GitLabServerErrorException(R.Body, R.Code);
                     }
