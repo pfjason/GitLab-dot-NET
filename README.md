@@ -7,7 +7,7 @@ Please submit issues via the issue tracker at GitLab.com
 
  * Building requires Visual Studio 2015
  * Allow NuGet to restore all packages
- * Currently Requires .NET 4.0
+ * Currently Requires .NET 4.6.1
 
 ## Contributing
 
