@@ -51,9 +51,12 @@ namespace GitLabDotNet
                 string URI = _Config.APIUrl + "projects/" + _Project.id.ToString()
                                         + "?name=" + HttpUtility.UrlEncode(_Project.name)
                                         + "&path=" + HttpUtility.UrlEncode(_Project.path)
-                                        + "&description=" + HttpUtility.UrlEncode(_Project.description)
-                                        + "&default_branch=" + HttpUtility.UrlEncode(_Project.default_branch)
-                                        + "&issues_enabled=" + Convert.ToInt32(_Project.issues_enabled).ToString()
+                                        + "&description=" + HttpUtility.UrlEncode(_Project.description);
+
+                if (!String.IsNullOrWhiteSpace(_Project.default_branch))
+                    URI +=                "&default_branch=" + HttpUtility.UrlEncode(_Project.default_branch);
+
+                URI +=                    "&issues_enabled=" + Convert.ToInt32(_Project.issues_enabled).ToString()
                                         + "&merge_requests_enabled=" + Convert.ToInt32(_Project.merge_requests_enabled).ToString()
                                         + "&builds_enabled=" + Convert.ToInt32(_Project.builds_enabled).ToString()
                                         + "&wiki_enabled=" + Convert.ToInt32(_Project.wiki_enabled).ToString()
@@ -306,6 +309,10 @@ namespace GitLabDotNet
             /// <param name="_AccessLevel"></param>
             public static void AddMember(Config _Config, Project _Project, User _User, Member.AccessLevel _AccessLevel)
             {
+                //OWNER access level only valid for groups according to https://docs.gitlab.com/ce/api/access_requests.html
+                if (_AccessLevel > Member.AccessLevel.MASTER)
+                    _AccessLevel = Member.AccessLevel.MASTER;
+
                 string URI = _Config.APIUrl + "projects/" + _Project.id.ToString() + "/members/?user_id=" + _User.id + "&access_level=" + Convert.ToInt64(_AccessLevel);
 
                 HttpResponse<string> R = Unirest.post(URI)
@@ -315,7 +322,7 @@ namespace GitLabDotNet
 
                 if (R.Code < 200 || R.Code >= 300)
                 {
-                    throw new GitLabServerErrorException(R.Body, R.Code);
+                    throw new GitLabServerErrorException("Exception performing action " + URI + ": " +R.Body, R.Code);
                 }
             }
 
@@ -328,7 +335,11 @@ namespace GitLabDotNet
             /// <param name="_AccessLevel"></param>
             public static void UpdateMember(Config _Config, Project _Project, User _User, Member.AccessLevel _AccessLevel)
             {
-                string URI = _Config.APIUrl + "projects/" + _Project.id.ToString() + "/members/" + _User.id + "?access_level=" + Convert.ToInt64(_AccessLevel);
+                //OWNER access level only valid for groups according to https://docs.gitlab.com/ce/api/access_requests.html
+                if (_AccessLevel > Member.AccessLevel.MASTER)
+                    _AccessLevel = Member.AccessLevel.MASTER;
+
+                string URI = _Config.APIUrl + "projects/" + _Project.id.ToString() + "/members/" + _User.id + "&access_level=" + Convert.ToInt64(_AccessLevel);
 
                 HttpResponse<string> R = Unirest.put(URI)
                                         .header("accept", "application/json")
