@@ -74,6 +74,8 @@ namespace GitLabDotNet
 
                         do
                         {
+                            webhooks.Clear();
+
                             string URI = _Config.APIUrl + "projects/" + _Project.id + "/hooks";
                             URI += "?per_page=100" + "&page=" + page.ToString();
 
@@ -82,7 +84,7 @@ namespace GitLabDotNet
                                     .header("PRIVATE-TOKEN", _Config.APIKey)
                                     .asString();
 
-                            if (R.Code < 200 | R.Code >= 300)
+                            if (R.Code < 200 || R.Code >= 300)
                             {
                                 throw new GitLabServerErrorException(R.Body, R.Code);
                             }
@@ -101,7 +103,6 @@ namespace GitLabDotNet
                             }
                             page++;
                             RetVal.AddRange(webhooks);
-                            webhooks = new List<Webhook>();
                         }
                         while (webhooks.Count > 0 & page < 100);
                     }
@@ -131,7 +132,7 @@ namespace GitLabDotNet
                                     .header("PRIVATE-TOKEN", _Config.APIKey)
                                     .asString();
 
-                        if (R.Code < 200 | R.Code >= 300)
+                        if (R.Code < 200 || R.Code >= 300)
                         {
                             throw new GitLabServerErrorException(R.Body, R.Code);
                         }
@@ -172,7 +173,7 @@ namespace GitLabDotNet
                                     .header("PRIVATE-TOKEN", _Config.APIKey)
                                     .asString();
 
-                        if (R.Code < 200 | R.Code >= 300)
+                        if (R.Code < 200 || R.Code >= 300)
                         {
                             throw new GitLabServerErrorException(R.Body, R.Code);
                         }
@@ -209,7 +210,7 @@ namespace GitLabDotNet
                                     .header("PRIVATE-TOKEN", _Config.APIKey)
                                     .asString();
 
-                        if (R.Code < 200 | R.Code >= 300)
+                        if (R.Code < 200 || R.Code >= 300)
                         {
                             throw new GitLabServerErrorException(R.Body, R.Code);
                         }
@@ -237,7 +238,7 @@ namespace GitLabDotNet
                                     .header("PRIVATE-TOKEN", _Config.APIKey)
                                     .asString();
 
-                        if (R.Code < 200 | R.Code >= 300)
+                        if (R.Code < 200 || R.Code >= 300)
                         {
                             throw new GitLabServerErrorException(R.Body, R.Code);
                         }
